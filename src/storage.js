@@ -17,13 +17,21 @@ export const getCurrentTasks = () => {
     return tasksArray || []; // ✅ ДВОЙНАЯ ЗАЩИТА: На случай parse ошибок
 }
 
+export const renderTasks = (tasksArray) => {
+    taskList.innerHTML = '';
+    tasksArray.forEach(taskValue => {
+        addTask(taskValue); // 🎯 Делегирование отрисовки
+    });
+
+}
+
 export const saveTasksToLocalStorage = () => {
     // ✅ РЕФАКТОРИНГ: Цикл заменен на функциональную цепочку
     const tasksArray = [...taskList.children] // 🎯 NodeList → Array
         .map(task => {
             const textElement = task.querySelector('span')
             const checkbox = task.querySelector('input[type="checkbox"]')
-            
+
             // 🛡️ ПАТТЕРН: Defensive Programming
             if (textElement && checkbox) {
                 return { // 🎯 Data Transformation: DOM → Object
@@ -46,13 +54,14 @@ export const saveTasksToLocalStorage = () => {
 
 export const loadTasksFromLocalStorage = () => {
     const tasksArray = getCurrentTasks()
-    taskList.innerHTML = ''; // 🎯 Clean Slate Pattern: очистка перед рендером
+    // 🎯 Clean Slate Pattern: очистка перед рендером
 
     // 🔄 ПАТТЕРН: Data to DOM Mapping
-        tasksArray.forEach(taskValue => {
-            addTask(taskValue); // 🎯 Делегирование отрисовки
-        });
+    renderTasks(tasksArray)
+    return tasksArray
 }
+
+
 
 // 🚨 АРХИТЕКТУРНАЯ ПРОБЛЕМА: Split State Management
 // Состояние размазано между DOM и LocalStorage
