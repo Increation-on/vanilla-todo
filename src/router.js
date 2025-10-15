@@ -1,6 +1,28 @@
-export const showFilteredTasks = (filterType) => {
-    console.log('Filter: ', filterType)
+import { loadTasksFromLocalStorage, renderTasks } from "./storage.js";
+
+const showFilteredTasks = (filterType) => {
+    const tasks = loadTasksFromLocalStorage();
+    const filtered = tasks.filter(task => {
+        if (filterType === 'active') return !task.completed;
+        if (filterType === 'completed') return task.completed;
+        return true;
+    });
+    
+    // ВРЕМЕННОЕ РЕШЕНИЕ: сохраняем полный список ПЕРЕД рендером
+    localStorage.setItem('all_tasks_backup', JSON.stringify(tasks));
+    
+    renderTasks(filtered);
+    
+    // Восстанавливаем полный список после небольшой задержки
+
+    setTimeout(() => {
+        const fullTasks = JSON.parse(localStorage.getItem('all_tasks_backup') || '[]');
+        localStorage.setItem('tasks', JSON.stringify(fullTasks));
+    }, 100);
+    //Но это костыль! Нужно переделать saveTasksToLocalStorage чтобы она не зависела от DOM! 🏗️
 }
+
+
 
 const handleRouteChange = () => {
     const path = window.location.pathname
@@ -23,25 +45,17 @@ const handleRouteChange = () => {
     }
 }
 
-
-
 export const initRouter = () => {
 
     console.log('Роутер инициализирован')
 
-    // window.addEventListener('hashchange', () => {
-    //     console.log('hash: ', window.location.hash)
-    //     handleRouteChange()
-    // })
-
     window.addEventListener('popstate', handleRouteChange);
 
     document.addEventListener('click', (e) => {
-        
-        if(e.target.classList.contains('nav-link')) {
+
+        if (e.target.classList.contains('nav-link')) {
             e.preventDefault()
             const newPath = e.target.getAttribute('href');
-            // console.log(newPath)
             history.pushState(null, '', newPath); // Меняем URL
             handleRouteChange()
         }
