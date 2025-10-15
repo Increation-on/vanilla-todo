@@ -3,16 +3,16 @@ export const showFilteredTasks = (filterType) => {
 }
 
 const handleRouteChange = () => {
-    const hash = window.location.hash
+    const path = window.location.pathname
 
-    switch (hash) {
-        case '#/':
+    switch (path) {
+        case '/':
             showFilteredTasks('all')
             break
-        case '#/active':
+        case '/active':
             showFilteredTasks('active')
             break
-        case '#/completed':
+        case '/completed':
             showFilteredTasks('completed')
             break
         case '':
@@ -23,13 +23,28 @@ const handleRouteChange = () => {
     }
 }
 
+
+
 export const initRouter = () => {
 
     console.log('Роутер инициализирован')
 
-    window.addEventListener('hashchange', () => {
-        console.log('hash', window.location.hash)
-        handleRouteChange()
+    // window.addEventListener('hashchange', () => {
+    //     console.log('hash: ', window.location.hash)
+    //     handleRouteChange()
+    // })
+
+    window.addEventListener('popstate', handleRouteChange);
+
+    document.addEventListener('click', (e) => {
+        
+        if(e.target.classList.contains('nav-link')) {
+            e.preventDefault()
+            const newPath = e.target.getAttribute('href');
+            // console.log(newPath)
+            history.pushState(null, '', newPath); // Меняем URL
+            handleRouteChange()
+        }
     })
 
     handleRouteChange()
