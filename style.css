@@ -1,0 +1,131 @@
+:root {
+    --neon-green: #00ff00;
+    --neon-blue: #00ffff;
+    --neon-purple: #ff00ff;
+    --dark-bg: #0a0a0a;
+    --glitch-shadow: 0 0 10px currentColor;
+}
+
+body {
+    background: var(--dark-bg);
+    color: var(--neon-green);
+    text-shadow: var(--glitch-shadow);
+    /* Твои отступы и шрифты тут */
+    margin: 0;
+    padding: 10px;
+    font-family: 'Courier New', monospace;
+    box-sizing: border-box;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--neon-blue);
+    text-shadow: 0 0 10px;
+    text-transform: capitalize;
+}
+
+.container {
+    background: rgba(0, 255, 0, 0.05);
+    border: 1px solid #00ff00;
+    border-radius: 0;
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+    /* Глитч-граница */
+    box-shadow:
+        0 0 10px #00ff00,
+        inset 0 0 10px #00ff00;
+}
+
+#loadApiTasks {
+    width: 40%;
+    margin: 0 auto 25px auto;
+    padding: 12px 20px;
+    background-color: transparent;
+    color: var(--neon-purple);
+    border: 2px solid;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.input-section {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+#taskInput {
+    width: 68%;
+    padding: 12px;
+    line-height: 1;
+    padding: 0;
+    padding-left: 10px;
+    background-color: transparent;
+    color: var(--neon-green);
+    border: 2px solid var(--neon-blue);
+    border-radius: 6px;
+    border-end-end-radius: 0;
+    border-top-right-radius: 0;
+    font-family: inherit;
+    display: inline-block;
+    height: 30px;
+    vertical-align: top;
+}
+
+#addBtn {
+    width: 27%;
+    background-color: var(--neon-purple);
+    color: white;
+    border: 2px solid var(--neon-purple);
+    border-radius: 6px;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-block;
+    margin-left: -9px;
+    vertical-align: top;
+    height: 33.5px;
+}
+
+#taskList li {
+   padding: 15px;
+   margin-bottom: 10px;
+   background-color: rgba(0, 255, 0, 0.05);
+   border-left: 4px solid #00ffff;
+   border-radius: 6px;
+}
+
+#taskList span {
+    color:  #00ff00;
+    margin-right: 15px;
+}
+
+#taskList input[type='checkbox'] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+#taskList button {
+    background-color: #ff00ff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#addBtn:hover {
+    background-color: var(--neon-blue);
+   
+}
+
+.completed {
+    color:#00ffff !important;
+    opacity: 0.7;
+    text-decoration: line-through;
+}
