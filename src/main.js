@@ -5,6 +5,7 @@
  */
 
 import { initEventHandlers, initApp } from './event-handlers.js'
+import { initRouter } from './router.js'
 
 // 🎯 ПАТТЕРН: Application Lifecycle Management
 // Единая точка входа - знает КОГДА и КАК запускать приложение
@@ -13,7 +14,7 @@ import { initEventHandlers, initApp } from './event-handlers.js'
 document.addEventListener('DOMContentLoaded', () => {
     initApp()          // Загружаем задачи из LocalStorage
     initEventHandlers() // Вешаем обработчики событий
-    
+    initRouter()
     // 💡 КОММЕНТАРИЙ: Правильная последовательность инициализации
     // 1. Сначала данные (могут влиять на DOM)
     // 2. Потом обработчики (ждут готового DOM)
