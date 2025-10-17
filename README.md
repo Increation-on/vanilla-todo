@@ -26,6 +26,7 @@ git clone https://github.com/Increation-on/vanilla-todo.git
 bash
 cd vanilla-todo
 # Открой index.html в браузере или используй LiveServer
+```
 
 ## 📁 Структура проекта
 
