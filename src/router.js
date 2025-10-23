@@ -1,28 +1,24 @@
-import { loadTasksFromLocalStorage, renderTasks } from "./storage.js";
+import { getTasks } from "./storage.js";
+import { renderTask } from "./dom-manager.js";
+import { taskList } from "./dom-elements.js";
+import { bindTaskEvents } from "./task-controller.js"; // 🎯 ИМПОРТИРУЕМ
 
 const showFilteredTasks = (filterType) => {
-    const tasks = loadTasksFromLocalStorage();
+    const tasks = getTasks();
+    
     const filtered = tasks.filter(task => {
         if (filterType === 'active') return !task.completed;
         if (filterType === 'completed') return task.completed;
         return true;
     });
     
-    // ВРЕМЕННОЕ РЕШЕНИЕ: сохраняем полный список ПЕРЕД рендером
-    localStorage.setItem('all_tasks_backup', JSON.stringify(tasks));
-    
-    renderTasks(filtered);
-    
-    // Восстанавливаем полный список после небольшой задержки
-
-    setTimeout(() => {
-        const fullTasks = JSON.parse(localStorage.getItem('all_tasks_backup') || '[]');
-        localStorage.setItem('tasks', JSON.stringify(fullTasks));
-    }, 100);
-    //Но это костыль! Нужно переделать saveTasksToLocalStorage чтобы она не зависела от DOM! 🏗️
+    // 🎯 Очищаем и перерисовываем С ПРИВЯЗКОЙ СОБЫТИЙ
+    taskList.innerHTML = '';
+    filtered.forEach(task => {
+        const elements = renderTask(task);
+        bindTaskEvents(elements.taskContainer, elements.taskText, elements.checkbox, elements.deleteButton, task.id); // 🎯 ПРИВЯЗЫВАЕМ
+    });
 }
-
-
 
 const handleRouteChange = () => {
     const path = window.location.pathname
@@ -46,21 +42,18 @@ const handleRouteChange = () => {
 }
 
 export const initRouter = () => {
-
     console.log('Роутер инициализирован')
 
     window.addEventListener('popstate', handleRouteChange);
 
     document.addEventListener('click', (e) => {
-
         if (e.target.classList.contains('nav-link')) {
             e.preventDefault()
             const newPath = e.target.getAttribute('href');
-            history.pushState(null, '', newPath); // Меняем URL
+            history.pushState(null, '', newPath);
             handleRouteChange()
         }
     })
 
     handleRouteChange()
 }
-
