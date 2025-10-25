@@ -12,6 +12,19 @@ import { taskInput } from './dom-elements.js'
 // 🎯 Валидация
 const validateTask = (text) => text.trim() !== ''
 
+const hasDuplicate = (newTaskText) => {
+
+    const savedTasks = getTasksFromStorage()
+    const normalizedNew = newTaskText.toLowerCase().replace(/\s+/g, ' ').trim();
+
+    return savedTasks.some(task => {
+        const normalizedSaved = task.text.toLowerCase().replace(/\s+/g, ' ').trim();
+        return normalizedSaved === normalizedNew
+    })
+
+}
+
+
 // 🎯 Привязка событий
 export const bindTaskEvents = (taskContainer, taskText, checkbox, deleteButton, taskId) => {
 
@@ -57,6 +70,13 @@ export const addTaskFromSource = (source, data) => {
 export const handleNewTask = () => {
     const text = taskInput.value
     if (!validateTask(text)) return
+
+    if (hasDuplicate(text)) {
+        // Твой вариант с подтверждением?
+        const shouldAddAnyway = confirm(`Задача "${text}" или аналогичная уже существует. Добавить еще раз?`)
+        if (!shouldAddAnyway) return
+    }
+
     taskInput.value = ''
     addTaskFromSource('user', { text })
 }

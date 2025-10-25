@@ -35,7 +35,7 @@ export const getTasks = () => {
 };
 
 // 🎯 ШАГ 2.3: ДОБАВЛЕНИЕ НОВОЙ ЗАДАЧИ
-// storage.js
+
 export const addTask = (taskData) => {
     const newTask = typeof taskData === 'string' 
         ? {
