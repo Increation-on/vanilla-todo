@@ -42,11 +42,15 @@ const handleRouteChange = () => {
 }
 
 export const initRouter = () => {
-    console.log('Роутер инициализирован')
+    
 
-    window.addEventListener('popstate', handleRouteChange);
+    window.addEventListener('popstate', () => {
+        
+        handleRouteChange()
+    });
 
     document.addEventListener('click', (e) => {
+       
         if (e.target.classList.contains('nav-link')) {
             e.preventDefault()
             const newPath = e.target.getAttribute('href');
