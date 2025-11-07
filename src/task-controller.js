@@ -1,19 +1,45 @@
-// task-controller.js - ИСПРАВЛЕННЫЙ
-import {
-    addTask as addTaskToStorage,
-    getTasks as getTasksFromStorage,
-    removeTask,
-    toggleTask
-} from './storage.js'
-import { deleteElement, toggleClass } from './dom-manipulation.js'
-import { renderTask } from './dom-manager.js'
-import { taskInput } from './dom-elements.js'
+/**
+ * МОДУЛЬ: КОНТРОЛЛЕР ЗАДАЧ (task-controller.js)
+ * 
+ * ЗАЧЕМ НУЖЕН: Координация между данными и интерфейсом
+ * 
+ * АРХИТЕКТУРА: Business Logic Layer
+ * - Валидация пользовательского ввода
+ * - Обработка бизнес-правил (дубликаты)
+ * - Координация разных источников данных
+ * - Управление потоком данных между storage и DOM
+ * 
+ * ПРИНЦИП: Посредник между пользователем и системой хранения
+ */
 
-// 🎯 Валидация
+import { addTaskToStorage, getTasksFromStorage } from './storage.js'
+import { renderTask, createTaskElement } from './dom-manager.js'
+import { taskInput } from './dom-elements.js'
+import { bindTaskEventHandlers as bindTaskEvents } from './task-event-binder.js'
+import { showFilteredTasks } from './router.js'
+
+/**
+ * ПРОВЕРКА ВАЛИДНОСТИ ТЕКСТА ЗАДАЧИ
+ * 
+ * ПРАВИЛА ВАЛИДАЦИИ:
+ * - Не пустая строка
+ * - Не только пробелы
+ * 
+ * ВОЗВРАЩАЕТ: true если текст подходит для создания задачи
+ */
 const validateTask = (text) => text.trim() !== ''
 
+/**
+ * ПРОВЕРКА ДУБЛИКАТОВ ЗАДАЧ
+ * 
+ * КАК РАБОТАЕТ:
+ * - Нормализует текст (нижний регистр, единые пробелы)
+ * - Сравнивает с существующими задачами
+ * - Игнорирует регистр и лишние пробелы
+ * 
+ * ЗАЧЕМ: Предотвращает создание одинаковых задач
+ */
 const hasDuplicate = (newTaskText) => {
-
     const savedTasks = getTasksFromStorage()
     const normalizedNew = newTaskText.toLowerCase().replace(/\s+/g, ' ').trim();
 
@@ -21,75 +47,121 @@ const hasDuplicate = (newTaskText) => {
         const normalizedSaved = task.text.toLowerCase().replace(/\s+/g, ' ').trim();
         return normalizedSaved === normalizedNew
     })
-
 }
 
-
-// 🎯 Привязка событий
-export const bindTaskEvents = (taskContainer, taskText, checkbox, deleteButton, taskId) => {
-
-    
-    deleteButton.addEventListener('click', () => {
-       
-        removeTask(taskId)
-        deleteElement(taskContainer)
-    })
-
-    checkbox.addEventListener('change', () => {
-        
-        toggleTask(taskId)
-        toggleClass(taskText, 'completed')
-    })
-}
-
-// 🎯 Универсальный addTask (ПЕРЕИМЕНОВАН)
+/**
+ * УНИВЕРСАЛЬНОЕ ДОБАВЛЕНИЕ ЗАДАЧ ИЗ ЛЮБОГО ИСТОЧНИКА
+ * 
+ * ИСТОЧНИКИ:
+ * - 'user'   → от пользователя (только текст)
+ * - 'storage' → из localStorage (полный объект)
+ * - 'api'    → с сервера (объект с API-структурой)
+ * 
+ * ПРОЦЕСС ДЛЯ КАЖДОГО ИСТОЧНИКА:
+ * 1. Сохраняем в хранилище
+ * 2. Создаем DOM-элементы
+ * 3. Рендерим в интерфейсе
+ * 4. Привязываем обработчики событий
+ */
 export const addTaskFromSource = (source, data) => {
     switch (source) {
-        case 'user':
-            const newTask = addTaskToStorage(data.text)
-            const elements = renderTask(newTask)
-            bindTaskEvents(elements.taskContainer, elements.taskText, elements.checkbox, elements.deleteButton, newTask.id)
+        case 'user': {
+            // 🎯 Пользователь ввел текст в интерфейсе
+            const userData = data.text
+            const newTask = addTaskToStorage(userData)
+            const { taskContainer, taskText, checkbox, deleteButton, id } = createTaskElement(newTask)
+            renderTask(taskContainer)
+            bindTaskEvents(taskContainer, taskText, checkbox, deleteButton, id)
             break
-        case 'storage':
-            const storageElements = renderTask(data)
-            bindTaskEvents(storageElements.taskContainer, storageElements.taskText, storageElements.checkbox, storageElements.deleteButton, data.id)
+        }
+
+        case 'storage': {
+            // 🎯 Загрузка из localStorage (при запуске приложения)
+            const storageData = data
+            const { taskContainer, taskText, checkbox, deleteButton, id } = createTaskElement(storageData)
+            renderTask(taskContainer)
+            bindTaskEvents(taskContainer, taskText, checkbox, deleteButton, id)
             break
-        case 'api':
+        }
+
+        case 'api': {
+            // 🎯 Загрузка с внешнего API
             const apiTask = addTaskToStorage({
                 id: data.id,
                 text: data.text,
                 completed: data.completed
             })
-            const apiElements = renderTask(apiTask)
-            bindTaskEvents(apiElements.taskContainer, apiElements.taskText, apiElements.checkbox, apiElements.deleteButton, data.id)
+            const { taskContainer, taskText, checkbox, deleteButton, id } = createTaskElement(apiTask)
+            renderTask(taskContainer)
+            bindTaskEvents(taskContainer, taskText, checkbox, deleteButton, id)
             break
+        }
     }
 }
 
-// 🎯 Обработчик новой задачи
+/**
+ * ОБРАБОТЧИК СОЗДАНИЯ НОВОЙ ЗАДАЧИ ОТ ПОЛЬЗОВАТЕЛЯ
+ * 
+ * ПОЛНЫЙ ЦИКЛ ОБРАБОТКИ:
+ * 1. Валидация ввода (не пустой текст)
+ * 2. Проверка дубликатов (предупреждение пользователя)
+ * 3. Сохранение в storage
+ * 4. Создание и рендеринг DOM
+ * 5. Автоматический переход на главную (если был другой фильтр)
+ * 
+ * UX-УЛУЧШЕНИЕ: После добавления задачи всегда показываем её
+ * (переключаем на главную если были в фильтре completed/active)
+ */
 export const handleNewTask = () => {
     const text = taskInput.value
+    
+    // 🛡️ Защита от мусорных данных
     if (!validateTask(text)) return
 
+    // ⚠️ Предупреждение о дубликатах
     if (hasDuplicate(text)) {
-        // Твой вариант с подтверждением?
         const shouldAddAnyway = confirm(`Задача "${text}" или аналогичная уже существует. Добавить еще раз?`)
         if (!shouldAddAnyway) return
     }
-
+    
+    // 🧹 Очистка поля ввода
     taskInput.value = ''
+    
+    // 🎯 Создание и отображение задачи
     addTaskFromSource('user', { text })
+    
+    // 🔄 UX: Показываем все задачи после добавления новой
+    const currentPath = window.location.pathname
+    if (currentPath !== '/') {
+        history.pushState(null, '', '/')
+        showFilteredTasks('all')
+    }
 }
 
-// 🎯 Инициализация
-export const initializeApp = () => {
+/**
+ * ИНИЦИАЛИЗАЦИЯ ЗАДАЧ ПРИ ЗАПУСКЕ ПРИЛОЖЕНИЯ
+ * 
+ * ЗАЧЕМ: Восстановление состояния интерфейса из localStorage
+ * КОГДА ВЫЗЫВАЕТСЯ: Один раз при запуске приложения
+ * 
+ * ПРОЦЕСС: Для каждой сохраненной задачи вызываем addTaskFromSource
+ * с источником 'storage' (уже готовые объекты задач)
+ */
+export const initializeTasks = () => {
     const savedTasks = getTasksFromStorage()
-   
+
     savedTasks.forEach((task) => {
-        const elements = renderTask(task)
-        bindTaskEvents(elements.taskContainer, elements.taskText, elements.checkbox, elements.deleteButton, task.id)
-        
+        addTaskFromSource('storage', task)
     })
-    
+
     console.log('Инициализация завершена')
 }
+
+// 💡 АРХИТЕКТУРНЫЙ КОММЕНТАРИЙ:
+// Этот модуль знает О ВСЕМ, но не делает ничего самостоятельно.
+// Его роль - координировать другие модули для выполнения бизнес-процессов.
+
+// 🔮 ВОЗМОЖНЫЕ УЛУЧШЕНИЯ:
+// - Более сложная валидация (максимальная длина, запрещенные слова)
+// - Undo/redo для операций с задачами
+// - Приоритеты задач и сложные фильтры

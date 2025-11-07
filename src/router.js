@@ -1,63 +1,127 @@
-import { getTasks } from "./storage.js";
-import { renderTask } from "./dom-manager.js";
-import { taskList } from "./dom-elements.js";
-import { bindTaskEvents } from "./task-controller.js"; // 🎯 ИМПОРТИРУЕМ
+/**
+ * МОДУЛЬ: МАРШРУТИЗАЦИЯ ПРИЛОЖЕНИЯ (router.js)
+ * 
+ * ЗАЧЕМ НУЖЕН: Управление отображением задач по URL
+ * 
+ * АРХИТЕКТУРА: Client-Side Routing (SPA)
+ * - История браузера без перезагрузки страницы
+ * - Фильтрация задач в зависимости от пути
+ * - Обработка навигации (клики + кнопки назад/вперед)
+ * 
+ * ПРИНЦИП: URL как состояние интерфейса
+ */
 
-const showFilteredTasks = (filterType) => {
-    const tasks = getTasks();
-    
+import { getTasksFromStorage } from "./storage.js";
+import { renderTask, createTaskElement } from "./dom-manager.js";
+import { taskList } from "./dom-elements.js";
+import { bindTaskEventHandlers as bindTaskEvents } from "./task-event-binder.js";
+
+/**
+ * ПОКАЗЫВАЕТ ОТФИЛЬТРОВАННЫЕ ЗАДАЧИ ПО ТИПУ
+ * 
+ * ФИЛЬТРЫ:
+ * - 'all'       → все задачи
+ * - 'active'    → только невыполненные (!completed)
+ * - 'completed' → только выполненные (completed)
+ * 
+ * ПРОЦЕСС:
+ * 1. Получаем все задачи из хранилища
+ * 2. Фильтруем по выбранному типу
+ * 3. Полностью перерисовываем список (проще чем синхронизация)
+ * 
+ * ПОЧЕМУ ПЕРЕРИСОВКА: Надежнее чем манипуляции с существующими элементами
+ * Всегда синхронизировано с данными, даже если они изменились в другом месте
+ */
+export const showFilteredTasks = (filterType) => {
+    const tasks = getTasksFromStorage();
+
+    // Фильтрация по статусу выполнения
     const filtered = tasks.filter(task => {
         if (filterType === 'active') return !task.completed;
         if (filterType === 'completed') return task.completed;
-        return true;
+        return true; // 'all' - все задачи
     });
-    
-    // 🎯 Очищаем и перерисовываем С ПРИВЯЗКОЙ СОБЫТИЙ
+
+    // Очистка и перерисовка
     taskList.innerHTML = '';
     filtered.forEach(task => {
-        const elements = renderTask(task);
-        bindTaskEvents(elements.taskContainer, elements.taskText, elements.checkbox, elements.deleteButton, task.id); // 🎯 ПРИВЯЗЫВАЕМ
+        const { taskContainer, taskText, checkbox, deleteButton, id } = createTaskElement(task)
+        renderTask(taskContainer);
+        bindTaskEvents(taskContainer, taskText, checkbox, deleteButton, id);
     });
 }
 
+/**
+ * ОБРАБАТЫВАЕТ ИЗМЕНЕНИЕ МАРШРУТА
+ * 
+ * КАК РАБОТАЕТ:
+ * - Смотрит на текущий URL (window.location.pathname)
+ * - Определяет какой фильтр показать
+ * - Вызывает отрисовку соответствующих задач
+ * 
+ * ОСОБЫЕ СЛУЧАИ:
+ * - Пустой путь → показываем все задачи
+ * - Неизвестный маршрут → перенаправляем на главную
+ */
 const handleRouteChange = () => {
-    const path = window.location.pathname
+    const path = window.location.pathname;
 
     switch (path) {
-        case '/':
+        case '/':                    // Главная - все задачи
             showFilteredTasks('all')
             break
-        case '/active':
+        case '/active':              // Только активные
             showFilteredTasks('active')
             break
-        case '/completed':
+        case '/completed':           // Только выполненные
             showFilteredTasks('completed')
             break
-        case '':
+        case '':                     // Защита от пустого URL
             showFilteredTasks('all')
             break
-        default:
-            return
+        default:                     // Неизвестный маршрут
+            history.replaceState(null, '', '/') // Тихий редирект
+            showFilteredTasks('all')
+            break
     }
 }
 
+/**
+ * ЗАПУСК СИСТЕМЫ МАРШРУТИЗАЦИИ
+ * 
+ * НАСТРАИВАЕТ:
+ * - Обработку кнопок назад/вперед (popstate)
+ * - Перехват кликов по навигационным ссылкам
+ * - Первоначальную отрисовку по текущему URL
+ * 
+ * КЛЮЧЕВОЙ ПАТТЕРН: Event-driven routing
+ * Реагируем на события, а не опрашиваем состояние
+ */
 export const initRouter = () => {
-    
-
+    // Навигация браузера (назад/вперед)
     window.addEventListener('popstate', () => {
-        
         handleRouteChange()
     });
 
+    // Клики по навигационным ссылкам
     document.addEventListener('click', (e) => {
-       
         if (e.target.classList.contains('nav-link')) {
-            e.preventDefault()
+            e.preventDefault() // Отменяем стандартную навигацию
             const newPath = e.target.getAttribute('href');
-            history.pushState(null, '', newPath);
-            handleRouteChange()
+            history.pushState(null, '', newPath); // Меняем URL
+            handleRouteChange() // Обновляем интерфейс
         }
     })
 
+    // Первоначальная настройка по текущему URL
     handleRouteChange()
 }
+
+// 💡 АРХИТЕКТУРНЫЙ КОММЕНТАРИЙ:
+// Роутер знает о фильтрации, но не о бизнес-логике задач.
+// Это правильное разделение - он управляет КАК показать, а не ЧТО показать.
+
+// 🔮 ВОЗМОЖНЫЕ УЛУЧШЕНИЯ:
+// - Динамические маршруты (/task/:id)
+// - Query-параметры для сложной фильтрации
+// - Анимации перехода между состояниями
