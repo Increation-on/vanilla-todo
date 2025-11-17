@@ -1,0 +1,96 @@
+/* auth.css */
+.auth-form {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 30px;
+    background: rgba(0, 255, 0, 0.05);
+    border: 1px solid var(--neon-blue);
+    border-radius: 0;
+    text-align: center;
+    box-shadow: 
+        0 0 10px var(--neon-blue),
+        inset 0 0 10px var(--neon-blue);
+}
+
+.auth-form h2 {
+    color: var(--neon-purple);
+    text-shadow: 0 0 10px;
+    margin-bottom: 25px;
+    text-transform: uppercase;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--neon-green);
+    text-shadow: var(--glitch-shadow);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    background-color: transparent;
+    color: var(--neon-green);
+    border: 2px solid var(--neon-blue);
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--neon-purple);
+    box-shadow: 0 0 10px var(--neon-purple);
+}
+
+.auth-form button {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--neon-purple);
+    color: white;
+    border: 2px solid var(--neon-purple);
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+}
+
+.auth-form button:hover {
+    background-color: var(--neon-blue);
+    border-color: var(--neon-blue);
+}
+
+.error-message {
+    margin-top: 5px;
+    font-size: 0.9em;
+    min-height: 20px;
+}
+
+.auth-form p {
+    color: var(--neon-green);
+}
+
+.auth-form a {
+    color: var(--neon-blue);
+    text-decoration: none;
+}
+
+.auth-form a:hover {
+    text-shadow: 0 0 10px var(--neon-blue);
+}
+
+#authForm button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: var(--neon-purple) !important; /* сохраняем цвет */
+}
+
+#authForm button:disabled:hover {
+    background-color: var(--neon-purple) !important; /* убираем hover эффект */
+}

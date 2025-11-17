@@ -14,7 +14,7 @@ import { addBtn, addApiTasksButton } from './dom-elements.js'
 import { loadTaskFromAPI } from './api.js'
 import { handleNewTask, initializeTasks } from './task-controller.js'
 import { initRouter } from './router.js'
-
+import { AuthForm } from './auth/auth-form.js'
 /**
  * Настраивает глобальные обработчики событий
  * 
@@ -47,9 +47,18 @@ export const initGlobalEventHandlers = () => {
  * ИСПОЛЬЗОВАТЬ: Только в main.js при запуске приложения
  */
 export const initApp = () => {
-    initializeTasks()          // 📦 Данные
-    initGlobalEventHandlers()  // 🖱️ Взаимодействия  
-    initRouter()               // 🧭 Навигация
+    // Создаем отдельный контейнер для формы
+    const authContainer = document.createElement('div');
+    authContainer.id = 'auth-container';
+    document.body.prepend(authContainer); // добавляем в начало body
+    
+    // Показываем форму
+    AuthForm.render(authContainer);
+    
+    // И обычный туду-лист
+    initializeTasks();
+    initGlobalEventHandlers();
+    initRouter();
 }
 
 // 💡 АРХИТЕКТУРНЫЙ КОММЕНТАРИЙ:
