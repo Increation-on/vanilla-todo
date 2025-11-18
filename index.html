@@ -2,20 +2,34 @@
 <html>
 
 <head>
+    <meta charset="UTF-8">
     <title>To-Do List</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="auth.css">
 </head>
 
 <body>
-    <div class="container">
-        <h1>My To-Do List</h1>
+    <!-- Header который всегда виден -->
+    <header id="app-header" class="app-header">
+        <h1>To-Do List</h1>
+        <div id="auth-info" class="auth-info" style="display: none;">
+            <span id="user-email" class="user-email"></span>
+            <button id="logoutBtn" class="logout-btn">Logout</button>
+        </div>
+    </header>
 
+    <div class="container">
         <!-- Навигационное меню -->
         <nav class="navigation">
             <a href="/" class="nav-link">All tasks</a>
             <a href="/active" class="nav-link">Active</a>
             <a href="/completed" class="nav-link">Completed</a>
         </nav>
+
+        <div class="search-section">
+            <input type="text" id="searchInput" placeholder="🔍 Search tasks...">
+            <button id="clearSearch" class="clear-search">x</button>
+        </div>
 
         <button id='loadApiTasks'>Load tasks from server</button>
 
@@ -27,10 +41,7 @@
         <ul id="taskList"></ul>
     </div>
 
-
     <script type="module" src="./src/main.js"></script>
-
-
 </body>
 
 </html>
