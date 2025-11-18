@@ -24,7 +24,7 @@ import { taskList } from './dom-elements.js'
  * 
  * ВОЗВРАЩАЕТ все созданные элементы для привязки событий
  */
-export const createTaskElement = (task) => {
+export const createTaskElement = (task, searchTerm = '') => {
     // Основа - контейнер задачи с ID для связи с данными
     const taskContainer = document.createElement('li')
     taskContainer.dataset.id = task.id
@@ -45,7 +45,16 @@ export const createTaskElement = (task) => {
 
     // Заполняем контент
     deleteButton.textContent = 'Delete'
-    taskText.textContent = task.text
+    
+    if (searchTerm && searchTerm.trim()) {
+        const highlightedText = task.text.replace(
+            new RegExp(searchTerm, 'gi'),
+            match => `<mark class="search-highlight">${match}</mark>`
+        );
+        taskText.innerHTML = highlightedText; // innerHTML вместо textContent
+    } else {
+        taskText.textContent = task.text;
+    }
 
     // Собираем иерархию
     taskContainer.appendChild(taskText)

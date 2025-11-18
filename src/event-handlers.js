@@ -6,6 +6,7 @@ import { initRouter } from './router.js'
 import { AuthForm } from './auth/auth-form.js'
 import { AuthManager } from './auth/auth-manager.js'
 import { initSearch } from './search.js'
+import { taskInput } from './dom-elements.js'
 
 /**
  * ГЛАВНЫЙ ЗАПУСК ПРИЛОЖЕНИЯ
@@ -13,7 +14,7 @@ import { initSearch } from './search.js'
 export const initApp = () => {
     // Всегда обновляем header
     updateAuthHeader();
-    
+
     // Проверяем авторизацию
     if (!AuthManager.isLoggedIn()) {
         showAuthForm();
@@ -29,12 +30,12 @@ const updateAuthHeader = () => {
     const authInfo = document.getElementById('auth-info');
     const userEmail = document.getElementById('user-email');
     const logoutBtn = document.getElementById('logoutBtn');
-    
+
     if (AuthManager.isLoggedIn()) {
         // Показываем информацию о пользователе
         authInfo.style.display = 'flex';
         userEmail.textContent = localStorage.getItem('userEmail');
-        
+
         // Настраиваем кнопку выхода
         logoutBtn.onclick = () => {
             AuthManager.logout();
@@ -51,24 +52,24 @@ const updateAuthHeader = () => {
  */
 const showAuthForm = () => {
     console.log('📝 Showing auth form');
-    
+
     // Скрываем контейнер с задачами
     const container = document.querySelector('.container');
     if (container) {
         container.style.display = 'none';
     }
-    
+
     // Убираем старую форму если есть
     const oldAuthContainer = document.getElementById('auth-container');
     if (oldAuthContainer) {
         oldAuthContainer.remove();
     }
-    
+
     // Создаем контейнер для формы
     const authContainer = document.createElement('div');
     authContainer.id = 'auth-container';
     document.body.appendChild(authContainer);
-    
+
     // Рендерим форму
     AuthForm.render(authContainer);
 }
@@ -78,19 +79,19 @@ const showAuthForm = () => {
  */
 const showTodoApp = () => {
     console.log('📋 Showing todo app');
-    
+
     // Показываем контейнер с задачами
     const container = document.querySelector('.container');
     if (container) {
         container.style.display = 'block';
     }
-    
+
     // Убираем форму авторизации если есть
     const authContainer = document.getElementById('auth-container');
     if (authContainer) {
         authContainer.remove();
     }
-    
+
     // Инициализируем туду-функциональность
     initializeTasks();
     initGlobalEventHandlers();
@@ -105,4 +106,10 @@ const showTodoApp = () => {
 export const initGlobalEventHandlers = () => {
     addBtn.addEventListener('click', handleNewTask);
     addApiTasksButton.addEventListener('click', loadTaskFromAPI);
+    // В initGlobalEventHandlers, после addBtn click listener:
+    taskInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            handleNewTask();
+        }
+    });
 }

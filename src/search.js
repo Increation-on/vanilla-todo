@@ -5,7 +5,7 @@ import { bindTaskEventHandlers as bindTaskEvents } from './task-event-binder.js'
 import { debounce } from './utils/debounce.js';
 
 // 🎯 Функция для отображения задач
-const showTasksList = (tasks) => {
+const showTasksList = (tasks, searchTerm = '') => {
     const taskList = document.getElementById('taskList');
 
     if (!taskList) return;
@@ -19,7 +19,7 @@ const showTasksList = (tasks) => {
 
     // Используем твои существующие функции
     tasks.forEach(task => {
-        const { taskContainer, taskText, checkbox, deleteButton, id } = createTaskElement(task);
+        const { taskContainer, taskText, checkbox, deleteButton, id } = createTaskElement(task, searchTerm);
         renderTask(taskContainer);
         bindTaskEvents(taskContainer, taskText, checkbox, deleteButton, id);
     });
@@ -42,7 +42,35 @@ const performSearch = (searchTerm) => {
     console.log('Найдено задач:', filteredTasks.length);
 
     // 🎯 Показываем результаты поиска
-    showTasksList(filteredTasks);
+    showTasksList(filteredTasks, searchTerm);
+};
+
+const showAutocomplete = (searchTerm) => {
+    const autocompleteList = document.getElementById('autocompleteList');
+    if (!autocompleteList) return;
+
+    if (!searchTerm.trim()) {
+        autocompleteList.innerHTML = '';
+        return;
+    }
+
+    const tasks = getTasksFromStorage();
+    const suggestions = tasks
+        .filter(task => task.text.toLowerCase().includes(searchTerm.toLowerCase()))
+        .slice(0, 5); // топ-5 подсказок
+
+    autocompleteList.innerHTML = suggestions.map(task =>
+        `<div class="autocomplete-item">${task.text}</div>`
+    ).join('');
+
+    // Обработчик клика по подсказке
+    autocompleteList.querySelectorAll('.autocomplete-item').forEach(item => {
+        item.addEventListener('click', () => {
+            document.getElementById('searchInput').value = item.textContent;
+            performSearch(item.textContent);
+            autocompleteList.innerHTML = '';
+        });
+    });
 };
 
 // Остальной код без изменений...
@@ -82,6 +110,9 @@ export const initSearch = () => {
     }, 300);
 
     searchInput.addEventListener('input', (e) => {
-        handleSearch(e.target.value);
+        const searchTerm = e.target.value;
+        handleSearch(searchTerm);
+        showAutocomplete(searchTerm); // 🔥 показываем подсказки
+        updateClearButton();
     });
 };
