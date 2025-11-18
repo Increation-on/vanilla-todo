@@ -1,4 +1,7 @@
 // auth-form.js
+import { AuthManager } from "./auth-manager.js";
+import { initApp } from "../event-handlers.js";
+
 export const AuthForm = {
     // Рендер формы входа/регистрации
     render(container) {
@@ -35,6 +38,7 @@ export const AuthForm = {
         this.handleFormSubmit();
         this.validateEmail();
         this.validatePassword(); // ← добавляем
+        this.validateConfirmPassword(); // ← ДОБАВЬ ЭТУ СТРОЧКУ
         this.switchMode();
         this.checkFormValidity(); // ← начальная проверка
     },
@@ -44,20 +48,36 @@ export const AuthForm = {
 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
 
-            try {
-                console.log('🎯 Начало обработки формы');
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const isLoginMode = document.getElementById('authTitle').textContent === 'Вход';
 
-                const email = document.getElementById('authEmail').value;
-                const password = document.getElementById('authPassword').value;
-                console.log('📧 Данные:', { email, password });
+            let success = false;
 
-            } catch (error) {
-                console.error('❌ Ошибка:', error);
+            if (isLoginMode) {
+                // РЕЖИМ ВХОДА
+                success = AuthManager.login(email, password);
+                if (success) {
+                    console.log('✅ Вход выполнен!');
+                    this.switchToTodoList();
+                } else {
+                    console.log('❌ Ошибка входа: неверный email или пароль');
+                    this.showError('Неверный email или пароль');
+                }
+            } else {
+                // РЕЖИМ РЕГИСТРАЦИИ
+                success = AuthManager.register(email, password);
+                if (success) {
+                    console.log('✅ Регистрация успешна!');
+                    this.showSuccessMessage('Регистрация успешна! Теперь войдите в аккаунт');
+                    // После регистрации автоматически переключаем на форму входа
+                    this.switchToLogin();
+                } else {
+                    console.log('❌ Ошибка регистрации: email уже занят');
+                    this.showError('Email уже занят');
+                }
             }
-            return false;
         })
     },
 
@@ -69,11 +89,11 @@ export const AuthForm = {
         const confirmGroup = document.getElementById('confirmPasswordGroup');
 
         const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        const isPasswordValid = password.length >= 6;
+        const isPasswordValid = /(?=.*[a-zA-Z])(?=.*\d).{6,}/.test(password);
 
-        // Если режим регистрации - проверяем подтверждение пароля
-        const isConfirmValid = confirmGroup.style.display === 'none' ||
-            password === confirmPassword;
+        // В режиме регистрации проверяем подтверждение пароля
+        const isRegistrationMode = confirmGroup.style.display === 'block';
+        const isConfirmValid = !isRegistrationMode || password === confirmPassword;
 
         button.disabled = !(isEmailValid && isPasswordValid && isConfirmValid);
 
@@ -131,9 +151,9 @@ export const AuthForm = {
                 passwordInput.style.borderColor = '';
                 return;
             }
-
-            if (password.length < 6) {
-                errorElement.textContent = 'Пароль должен содержать минимум 6 символов';
+            const passwordRegex = /(?=.*[a-zA-Z])(?=.*\d).{6,}/;
+            if (!passwordRegex.test(password)) {
+                errorElement.textContent = 'Пароль должен содержать минимум 6 символов, буквы и цифры';
                 errorElement.style.color = 'red';
                 passwordInput.style.borderColor = 'red';
             } else {
@@ -152,13 +172,14 @@ export const AuthForm = {
         const title = document.getElementById('authTitle');
         const button = document.getElementById('authButton');
         const confirmGroup = document.getElementById('confirmPasswordGroup');
+        const confirmInput = document.getElementById('authConfirmPassword');
 
-        let isLoginMode = true; // начальный режим - Вход
+        let isLoginMode = true;
 
         switchLink.addEventListener('click', (e) => {
             e.preventDefault();
 
-            isLoginMode = !isLoginMode; // меняем режим
+            isLoginMode = !isLoginMode;
 
             if (isLoginMode) {
                 // Переключаем на Вход
@@ -166,6 +187,8 @@ export const AuthForm = {
                 button.textContent = 'Войти';
                 switchLink.textContent = 'Зарегистрироваться';
                 confirmGroup.style.display = 'none';
+                // Очищаем поле подтверждения
+                confirmInput.value = '';
             } else {
                 // Переключаем на Регистрацию
                 title.textContent = 'Регистрация';
@@ -175,6 +198,62 @@ export const AuthForm = {
             }
 
             // Обновляем валидацию
+            this.checkFormValidity();
+        });
+    },
+
+    // В конец AuthForm, после switchMode
+    switchToTodoList() {
+    console.log('✅ Auth successful, switching to TodoApp');
+    // Просто перезапускаем приложение - оно само покажет задачи
+    initApp();
+},
+
+    switchToLogin() {
+        // Переключаем обратно на форму входа
+        document.getElementById('authTitle').textContent = 'Вход';
+        document.getElementById('authButton').textContent = 'Войти';
+        document.getElementById('switchMode').textContent = 'Зарегистрироваться';
+        document.getElementById('confirmPasswordGroup').style.display = 'none';
+
+        // Очищаем поля
+        document.getElementById('authPassword').value = '';
+        document.getElementById('authConfirmPassword').value = '';
+    },
+
+    showSuccessMessage(message) {
+        // Просто покажем в консоли, потом сделаем красиво
+        console.log('🎉 ' + message);
+    },
+
+    // Валидация подтверждения пароля
+    validateConfirmPassword() {
+        const confirmInput = document.getElementById('authConfirmPassword');
+        const errorElement = document.getElementById('confirmPasswordError');
+        const passwordInput = document.getElementById('authPassword');
+
+        if (!confirmInput) return;
+
+        confirmInput.addEventListener('input', (e) => {
+            const confirmPassword = e.target.value;
+            const password = passwordInput.value;
+
+            if (confirmPassword === '') {
+                errorElement.textContent = '';
+                confirmInput.style.borderColor = '';
+                return;
+            }
+
+            if (confirmPassword !== password) {
+                errorElement.textContent = 'Пароли не совпадают';
+                errorElement.style.color = 'red';
+                confirmInput.style.borderColor = 'red';
+            } else {
+                errorElement.textContent = '✓ Пароли совпадают';
+                errorElement.style.color = 'green';
+                confirmInput.style.borderColor = 'green';
+            }
+
             this.checkFormValidity();
         });
     }

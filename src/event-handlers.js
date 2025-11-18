@@ -1,67 +1,108 @@
-/**
- * МОДУЛЬ: ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ (event-handlers.js)
- * 
- * ЗАЧЕМ НУЖЕН: Точка входа и настройка всех взаимодействий
- * 
- * АРХИТЕКТУРА: 
- * - initApp: главный запуск всего приложения
- * - initGlobalEventHandlers: настройка глобальных кликов
- * 
- * ПРИНЦИП: Фасад - скрывает сложность инициализации за простым интерфейсом
- */
-
+// event-handlers.js
 import { addBtn, addApiTasksButton } from './dom-elements.js'
 import { loadTaskFromAPI } from './api.js'
 import { handleNewTask, initializeTasks } from './task-controller.js'
 import { initRouter } from './router.js'
 import { AuthForm } from './auth/auth-form.js'
-/**
- * Настраивает глобальные обработчики событий
- * 
- * ЧТО НАСТРАИВАЕТ:
- * - Кнопка "Add" → создание новой задачи
- * - Кнопка "Load from API" → загрузка задач с сервера
- * 
- * ОСОБЕННОСТИ:
- * - Только глобальные клики (не касается отдельных задач)
- * - Вызывается один раз при запуске приложения
- */
-export const initGlobalEventHandlers = () => {
-    addBtn.addEventListener('click', handleNewTask)
-    addApiTasksButton.addEventListener('click', loadTaskFromAPI)
-}
+import { AuthManager } from './auth/auth-manager.js'
+import { initSearch } from './search.js'
 
 /**
  * ГЛАВНЫЙ ЗАПУСК ПРИЛОЖЕНИЯ
- * 
- * ПОСЛЕДОВАТЕЛЬНОСТЬ ИНИЦИАЛИЗАЦИИ:
- * 1. initializeTasks()    - загрузка задач из localStorage
- * 2. initGlobalEventHandlers() - настройка кнопок
- * 3. initRouter()         - запуск маршрутизации
- * 
- * ПОЧЕМУ ТАКОЙ ПОРЯДОК:
- * - Сначала данные (задачи могут влиять на DOM)
- * - Потом обработчики (ждут готового DOM)
- * - В конце роутер (работает с готовым интерфейсом)
- * 
- * ИСПОЛЬЗОВАТЬ: Только в main.js при запуске приложения
  */
 export const initApp = () => {
-    // Создаем отдельный контейнер для формы
+    // Всегда обновляем header
+    updateAuthHeader();
+    
+    // Проверяем авторизацию
+    if (!AuthManager.isLoggedIn()) {
+        showAuthForm();
+    } else {
+        showTodoApp();
+    }
+}
+
+/**
+ * ОБНОВЛЯЕМ HEADER В ЗАВИСИМОСТИ ОТ АВТОРИЗАЦИИ
+ */
+const updateAuthHeader = () => {
+    const authInfo = document.getElementById('auth-info');
+    const userEmail = document.getElementById('user-email');
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    if (AuthManager.isLoggedIn()) {
+        // Показываем информацию о пользователе
+        authInfo.style.display = 'flex';
+        userEmail.textContent = localStorage.getItem('userEmail');
+        
+        // Настраиваем кнопку выхода
+        logoutBtn.onclick = () => {
+            AuthManager.logout();
+            initApp(); // перезапускаем приложение
+        };
+    } else {
+        // Скрываем информацию о пользователе
+        authInfo.style.display = 'none';
+    }
+}
+
+/**
+ * ПОКАЗЫВАЕМ ФОРМУ АВТОРИЗАЦИИ (скрываем задачи)
+ */
+const showAuthForm = () => {
+    console.log('📝 Showing auth form');
+    
+    // Скрываем контейнер с задачами
+    const container = document.querySelector('.container');
+    if (container) {
+        container.style.display = 'none';
+    }
+    
+    // Убираем старую форму если есть
+    const oldAuthContainer = document.getElementById('auth-container');
+    if (oldAuthContainer) {
+        oldAuthContainer.remove();
+    }
+    
+    // Создаем контейнер для формы
     const authContainer = document.createElement('div');
     authContainer.id = 'auth-container';
-    document.body.prepend(authContainer); // добавляем в начало body
+    document.body.appendChild(authContainer);
     
-    // Показываем форму
+    // Рендерим форму
     AuthForm.render(authContainer);
+}
+
+/**
+ * ПОКАЗЫВАЕМ ТУДУ-ЛИСТ (скрываем форму)
+ */
+const showTodoApp = () => {
+    console.log('📋 Showing todo app');
     
-    // И обычный туду-лист
+    // Показываем контейнер с задачами
+    const container = document.querySelector('.container');
+    if (container) {
+        container.style.display = 'block';
+    }
+    
+    // Убираем форму авторизации если есть
+    const authContainer = document.getElementById('auth-container');
+    if (authContainer) {
+        authContainer.remove();
+    }
+    
+    // Инициализируем туду-функциональность
     initializeTasks();
     initGlobalEventHandlers();
     initRouter();
+
+    initSearch();
 }
 
-// 💡 АРХИТЕКТУРНЫЙ КОММЕНТАРИЙ:
-// Раньше main.js знал слишком много о внутренних модулях.
-// Теперь он знает только про initApp() - это правильная инкапсуляция.
-// Если добавится новый модуль, main.js не нужно будет менять.
+/**
+ * Настраивает глобальные обработчики событий для туду-листа
+ */
+export const initGlobalEventHandlers = () => {
+    addBtn.addEventListener('click', handleNewTask);
+    addApiTasksButton.addEventListener('click', loadTaskFromAPI);
+}
