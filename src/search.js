@@ -45,6 +45,34 @@ const performSearch = (searchTerm) => {
     showTasksList(filteredTasks, searchTerm);
 };
 
+const showAutocomplete = (searchTerm) => {
+    const autocompleteList = document.getElementById('autocompleteList');
+    if (!autocompleteList) return;
+
+    if (!searchTerm.trim()) {
+        autocompleteList.innerHTML = '';
+        return;
+    }
+
+    const tasks = getTasksFromStorage();
+    const suggestions = tasks
+        .filter(task => task.text.toLowerCase().includes(searchTerm.toLowerCase()))
+        .slice(0, 5); // топ-5 подсказок
+
+    autocompleteList.innerHTML = suggestions.map(task =>
+        `<div class="autocomplete-item">${task.text}</div>`
+    ).join('');
+
+    // Обработчик клика по подсказке
+    autocompleteList.querySelectorAll('.autocomplete-item').forEach(item => {
+        item.addEventListener('click', () => {
+            document.getElementById('searchInput').value = item.textContent;
+            performSearch(item.textContent);
+            autocompleteList.innerHTML = '';
+        });
+    });
+};
+
 // Остальной код без изменений...
 export const initSearch = () => {
     const searchInput = document.getElementById('searchInput');
@@ -82,6 +110,9 @@ export const initSearch = () => {
     }, 300);
 
     searchInput.addEventListener('input', (e) => {
-        handleSearch(e.target.value);
+        const searchTerm = e.target.value;
+        handleSearch(searchTerm);
+        showAutocomplete(searchTerm); // 🔥 показываем подсказки
+        updateClearButton();
     });
 };

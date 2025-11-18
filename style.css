@@ -241,3 +241,26 @@ h1 {
     padding: 2px 4px;
     border-radius: 3px;
 }
+
+.autocomplete-list {
+    position: absolute;
+    top: 100%;
+    left: 10%;
+    right: 10%;
+    background: var(--dark-bg);
+    border: 1px solid var(--neon-blue);
+    border-top: none;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.autocomplete-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    color: var(--neon-green);
+}
+
+.autocomplete-item:hover {
+    background: rgba(0, 255, 255, 0.1);
+}
