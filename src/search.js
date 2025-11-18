@@ -5,7 +5,7 @@ import { bindTaskEventHandlers as bindTaskEvents } from './task-event-binder.js'
 import { debounce } from './utils/debounce.js';
 
 // 🎯 Функция для отображения задач
-const showTasksList = (tasks) => {
+const showTasksList = (tasks, searchTerm = '') => {
     const taskList = document.getElementById('taskList');
 
     if (!taskList) return;
@@ -19,7 +19,7 @@ const showTasksList = (tasks) => {
 
     // Используем твои существующие функции
     tasks.forEach(task => {
-        const { taskContainer, taskText, checkbox, deleteButton, id } = createTaskElement(task);
+        const { taskContainer, taskText, checkbox, deleteButton, id } = createTaskElement(task, searchTerm);
         renderTask(taskContainer);
         bindTaskEvents(taskContainer, taskText, checkbox, deleteButton, id);
     });
@@ -42,7 +42,7 @@ const performSearch = (searchTerm) => {
     console.log('Найдено задач:', filteredTasks.length);
 
     // 🎯 Показываем результаты поиска
-    showTasksList(filteredTasks);
+    showTasksList(filteredTasks, searchTerm);
 };
 
 // Остальной код без изменений...
