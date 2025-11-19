@@ -69,18 +69,19 @@ export const addTaskFromSource = (source, data) => {
             // 🎯 Пользователь ввел текст в интерфейсе
             const userData = data.text
             const newTask = addTaskToStorage(userData)
-            const { taskContainer, taskText, checkbox, deleteButton, id } = createTaskElement(newTask)
+            const { taskContainer, taskText, checkbox, deleteButton, editButton, id } = createTaskElement(newTask)
+            console.log('🔧 task-controller: editButton получен', editButton) // ← ДОБАВ
             renderTask(taskContainer)
-            bindTaskEvents(taskContainer, taskText, checkbox, deleteButton, id)
+            bindTaskEvents(taskContainer, taskText, checkbox, deleteButton, editButton, id)
             break
         }
 
         case 'storage': {
             // 🎯 Загрузка из localStorage (при запуске приложения)
             const storageData = data
-            const { taskContainer, taskText, checkbox, deleteButton, id } = createTaskElement(storageData)
+            const { taskContainer, taskText, checkbox, deleteButton, editButton, id } = createTaskElement(storageData)
             renderTask(taskContainer)
-            bindTaskEvents(taskContainer, taskText, checkbox, deleteButton, id)
+            bindTaskEvents(taskContainer, taskText, checkbox, deleteButton, editButton, id)
             break
         }
 
@@ -91,9 +92,9 @@ export const addTaskFromSource = (source, data) => {
                 text: data.text,
                 completed: data.completed
             })
-            const { taskContainer, taskText, checkbox, deleteButton, id } = createTaskElement(apiTask)
+            const { taskContainer, taskText, checkbox, deleteButton, editButton, id } = createTaskElement(apiTask)
             renderTask(taskContainer)
-            bindTaskEvents(taskContainer, taskText, checkbox, deleteButton, id)
+            bindTaskEvents(taskContainer, taskText, checkbox, deleteButton, editButton, id)
             break
         }
     }

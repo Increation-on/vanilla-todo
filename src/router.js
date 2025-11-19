@@ -45,9 +45,9 @@ export const showFilteredTasks = (filterType) => {
     // Очистка и перерисовка
     taskList.innerHTML = '';
     filtered.forEach(task => {
-        const { taskContainer, taskText, checkbox, deleteButton, id } = createTaskElement(task)
+        const { taskContainer, taskText, checkbox, deleteButton, editButton, id } = createTaskElement(task)
         renderTask(taskContainer);
-        bindTaskEvents(taskContainer, taskText, checkbox, deleteButton, id);
+        bindTaskEvents(taskContainer, taskText, checkbox, deleteButton, editButton, id);
     });
 }
 

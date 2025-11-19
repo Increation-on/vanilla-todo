@@ -13,6 +13,7 @@
 
 import { removeTaskFromStorage, toggleTaskStatus } from './storage.js'
 import { deleteElement, toggleClass } from './dom-manipulation.js'
+import { initInlineEditor } from './inline-editor/inline-editor.js'
 
 /**
  * ПРИВЯЗЫВАЕТ ОБРАБОТЧИКИ СОБЫТИЙ К ЭЛЕМЕНТАМ ЗАДАЧИ
@@ -25,8 +26,9 @@ import { deleteElement, toggleClass } from './dom-manipulation.js'
  * - Изменения в данных → автоматически сохраняются
  * - Изменения в интерфейсе → синхронизируются с данными
  */
-export const bindTaskEventHandlers = (taskContainer, taskText, checkbox, deleteButton, taskId) => {
-
+export const bindTaskEventHandlers = (taskContainer, taskText, checkbox, deleteButton, editButton, taskId) => {
+ console.log('🔧 bindTaskEventHandlers: editButton =', editButton) // ← ДОБАВЬ
+    console.log('🔧 bindTaskEventHandlers: taskId =', taskId) // ← ДОБАВЬ
     /**
      * ОБРАБОТЧИК УДАЛЕНИЯ ЗАДАЧИ
      * 
@@ -53,6 +55,15 @@ export const bindTaskEventHandlers = (taskContainer, taskText, checkbox, deleteB
     checkbox.addEventListener('change', () => {
         toggleTaskStatus(taskId)         // 📦 Обновляем данные
         toggleClass(taskText, 'completed') // 🎨 Обновляем внешний вид
+    })
+
+    initInlineEditor(editButton, taskId, taskText.textContent, (taskId, newText) => {
+        // Обновляем текст в DOM
+        taskText.textContent = newText
+        
+        // 💡 Если нужно обновить подсветку поиска:
+        // можно вызвать перерисовку задачи или обновить только текст
+        console.log(`Задача ${taskId} обновлена: ${newText}`)
     })
 }
 
