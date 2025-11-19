@@ -11,6 +11,7 @@
  */
 
 import { taskList } from './dom-elements.js'
+import { escapeRegex, escapeHtml } from './utils/escape.js'
 
 /**
  * Фабрика по созданию DOM-элементов для одной задачи
@@ -25,6 +26,7 @@ import { taskList } from './dom-elements.js'
  * ВОЗВРАЩАЕТ все созданные элементы для привязки событий
  */
 export const createTaskElement = (task, searchTerm = '') => {
+    console.log('🔧 createTaskElement вызван для задачи:', task.text)
     // Основа - контейнер задачи с ID для связи с данными
     const taskContainer = document.createElement('li')
     taskContainer.dataset.id = task.id
@@ -33,6 +35,10 @@ export const createTaskElement = (task, searchTerm = '') => {
     const taskText = document.createElement('span')
     const deleteButton = document.createElement('button')
     const checkbox = document.createElement('input')
+
+    const editButton = document.createElement('button')
+    editButton.textContent = 'Edit'
+    editButton.className = 'edit-btn'
 
     // Настраиваем чекбокс согласно данным задачи
     checkbox.type = 'checkbox'
@@ -47,9 +53,10 @@ export const createTaskElement = (task, searchTerm = '') => {
     deleteButton.textContent = 'Delete'
     
     if (searchTerm && searchTerm.trim()) {
+         const escapedTerm = escapeRegex(searchTerm)
         const highlightedText = task.text.replace(
-            new RegExp(searchTerm, 'gi'),
-            match => `<mark class="search-highlight">${match}</mark>`
+            new RegExp(escapedTerm, 'gi'),
+            match => `<mark class="search-highlight">${escapeHtml(match)}</mark>`
         );
         taskText.innerHTML = highlightedText; // innerHTML вместо textContent
     } else {
@@ -59,14 +66,18 @@ export const createTaskElement = (task, searchTerm = '') => {
     // Собираем иерархию
     taskContainer.appendChild(taskText)
     taskContainer.appendChild(checkbox)
+    taskContainer.appendChild(editButton)
     taskContainer.appendChild(deleteButton)
+
+     console.log('🔧 Все элементы добавлены в taskContainer') // ← ДОБАВЬ
 
     // Возвращаем все элементы для дальнейшей работы
     return { 
         taskContainer, 
         taskText, 
         checkbox, 
-        deleteButton, 
+        deleteButton,
+        editButton, 
         id: task.id 
     }
 }

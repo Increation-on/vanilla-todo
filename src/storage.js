@@ -141,6 +141,18 @@ export const toggleTaskStatus = (id) => {
     saveToStorage();
 };
 
+export const updateTaskText = (id, newText) => {
+    const trimmedText = newText.trim()
+    if (!trimmedText) return // 🛡️ защита от пустого текста
+    
+    tasks = tasks.map(task => 
+        task.id === id 
+            ? { ...task, text: trimmedText }
+            : task
+    )
+    saveToStorage()
+}
+
 // 💡 АРХИТЕКТУРНЫЙ КОММЕНТАРИЙ:
 // Этот модуль - единственное место в приложении, где можно изменить tasks.
 // Все изменения проходят через экспортированные функции, что делает

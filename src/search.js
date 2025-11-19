@@ -3,7 +3,7 @@ import { getTasksFromStorage } from './storage.js';
 import { createTaskElement, renderTask } from './dom-manager.js';
 import { bindTaskEventHandlers as bindTaskEvents } from './task-event-binder.js';
 import { debounce } from './utils/debounce.js';
-
+import { escapeHtml } from './utils/escape.js';
 // 🎯 Функция для отображения задач
 const showTasksList = (tasks, searchTerm = '') => {
     const taskList = document.getElementById('taskList');
@@ -19,9 +19,9 @@ const showTasksList = (tasks, searchTerm = '') => {
 
     // Используем твои существующие функции
     tasks.forEach(task => {
-        const { taskContainer, taskText, checkbox, deleteButton, id } = createTaskElement(task, searchTerm);
+        const { taskContainer, taskText, checkbox, deleteButton, editButton, id } = createTaskElement(task, searchTerm);
         renderTask(taskContainer);
-        bindTaskEvents(taskContainer, taskText, checkbox, deleteButton, id);
+        bindTaskEvents(taskContainer, taskText, checkbox, deleteButton, editButton, id);
     });
 };
 
@@ -60,7 +60,7 @@ const showAutocomplete = (searchTerm) => {
         .slice(0, 5); // топ-5 подсказок
 
     autocompleteList.innerHTML = suggestions.map(task =>
-        `<div class="autocomplete-item">${task.text}</div>`
+        `<div class="autocomplete-item">${escapeHtml(task.text)}</div>`
     ).join('');
 
     // Обработчик клика по подсказке
@@ -92,6 +92,7 @@ export const initSearch = () => {
         clearButton.addEventListener('click', () => {
             searchInput.value = '';
             performSearch(''); // Сбрасываем поиск
+            showAutocomplete('')
             updateClearButton();
         });
     }
