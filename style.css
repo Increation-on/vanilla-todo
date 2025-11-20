@@ -264,3 +264,55 @@ h1 {
 .autocomplete-item:hover {
     background: rgba(0, 255, 255, 0.1);
 }
+
+/* ФИКСИРОВАННОЕ ПОЛОЖЕНИЕ ЧЕКБОКСОВ */
+#taskList li {
+    position: relative;        /* ← важно для абсолютного позиционирования */
+    padding-left: 50px;       /* ← место для чекбокса */
+    min-height: 40px;         /* ← минимальная высота */
+    display: flex;
+    align-items: center;
+}
+
+#taskList input[type='checkbox'] {
+    position: absolute;        /* ← вырываем из потока */
+    left: 15px;               /* ← фиксированная позиция слева */
+    top: 50%;                 /* ← по центру по вертикали */
+    transform: translateY(-50%); /* ← точное центрирование */
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    margin: 0;                /* ← убираем любые отступы */
+}
+
+/* Текст задачи занимает всё оставшееся пространство */
+#taskList span {
+    flex: 1;                  /* ← растягивается на всю ширину */
+    margin-right: 15px;
+    word-break: break-word;   /* ← перенос длинного текста */
+}
+
+/* Кнопки тоже фиксируем справа */
+#taskList button {
+    background-color: #ff00ff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px;        /* ← отступ от текста */
+}
+
+/* ВИЗУАЛЬНОЕ ВЫДЕЛЕНИЕ АКТИВНОЙ ССЫЛКИ */
+.nav-link.active {
+    background-color: rgba(0, 255, 255, 0.2) !important;
+    color: var(--neon-blue) !important;
+    border-color: var(--neon-blue) !important;
+    box-shadow: 0 0 15px var(--neon-blue) !important;
+    font-weight: bold;
+}
+
+/* Убедимся что ховер не перекрывает активное состояние */
+.nav-link.active:hover {
+    background-color: rgba(0, 255, 255, 0.3) !important;
+}
