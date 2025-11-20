@@ -5,7 +5,7 @@ import { handleNewTask, initializeTasks } from './task-controller.js'
 import { initRouter } from './router.js'
 import { AuthForm } from './auth/auth-form.js'
 import { AuthManager } from './auth/auth-manager.js'
-import { initSearch } from './search.js'
+import { initSearch } from './search/search.js'
 import { taskInput } from './dom-elements.js'
 
 /**
