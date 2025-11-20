@@ -66,23 +66,36 @@ export const showFilteredTasks = (filterType) => {
 const handleRouteChange = () => {
     const path = window.location.pathname;
 
+    // 1. УБИРАЕМ активный класс со всех ссылок
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+
+    // 2. ДОБАВЛЯЕМ активный класс текущей ссылке
+    let activeLink;
     switch (path) {
-        case '/':                    // Главная - все задачи
-            showFilteredTasks('all')
-            break
-        case '/active':              // Только активные
-            showFilteredTasks('active')
-            break
-        case '/completed':           // Только выполненные
-            showFilteredTasks('completed')
-            break
-        case '':                     // Защита от пустого URL
-            showFilteredTasks('all')
-            break
-        default:                     // Неизвестный маршрут
-            history.replaceState(null, '', '/') // Тихий редирект
-            showFilteredTasks('all')
-            break
+        case '/':
+            showFilteredTasks('all');
+            activeLink = document.querySelector('a[href="/"]');
+            break;
+        case '/active':
+            showFilteredTasks('active');
+            activeLink = document.querySelector('a[href="/active"]');
+            break;
+        case '/completed':
+            showFilteredTasks('completed');
+            activeLink = document.querySelector('a[href="/completed"]');
+            break;
+        default:
+            history.replaceState(null, '', '/');
+            showFilteredTasks('all');
+            activeLink = document.querySelector('a[href="/"]');
+            break;
+    }
+
+    // 3. Добавляем класс если ссылка найдена
+    if (activeLink) {
+        activeLink.classList.add('active');
     }
 }
 
