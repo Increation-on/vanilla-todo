@@ -1,24 +1,78 @@
 /* auth.css */
+
+/* 🎯 БАЗОВЫЕ СТИЛИ ФОРМЫ */
 .auth-form {
     max-width: 400px;
     margin: 50px auto;
     padding: 30px;
-    background: rgba(0, 255, 0, 0.05);
-    border: 1px solid var(--neon-blue);
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid var(--neon-blue);
     border-radius: 0;
     text-align: center;
+    color: var(--neon-green);
+    font-family: 'Courier New', monospace;
     box-shadow: 
         0 0 10px var(--neon-blue),
         inset 0 0 10px var(--neon-blue);
+    transition: all 0.3s ease;
 }
 
-.auth-form h2 {
+/* 🟢 РЕЖИМ ВХОДА - ЗЕЛЕНАЯ РАМКА / ФИОЛЕТОВЫЙ ТЕКСТ */
+.auth-form.login-mode {
+    border-color: var(--neon-green);
+    box-shadow: 
+        0 0 20px var(--neon-green),
+        inset 0 0 10px var(--neon-green);
+    color: var(--neon-purple);    
+}
+
+.auth-form.login-mode h2 {
+    color: var(--neon-purple); /* 🟣 ФИОЛЕТОВЫЙ заголовок */
+}
+
+.auth-form.login-mode .form-group input {
+    border-color: var(--neon-green); /* 🟢 ЗЕЛЕНАЯ рамка поля */
+}
+
+.auth-form.login-mode button {
+    background-color: var(--neon-purple); /* 🟣 ФИОЛЕТОВАЯ кнопка */
+    border-color: var(--neon-purple);
+}
+
+.auth-form.login-mode .form-group label {
     color: var(--neon-purple);
-    text-shadow: 0 0 10px;
+}
+
+/* 🟣 РЕЖИМ РЕГИСТРАЦИИ - ФИОЛЕТОВАЯ РАМКА / ЗЕЛЕНЫЙ ТЕКСТ */
+.auth-form.register-mode {
+    border-color: var(--neon-purple);
+    box-shadow: 
+        0 0 20px var(--neon-purple),
+        inset 0 0 10px var(--neon-purple);
+}
+
+.auth-form.register-mode h2 {
+    color: var(--neon-green); /* 🟢 ЗЕЛЕНЫЙ заголовок */
+}
+
+.auth-form.register-mode .form-group input {
+    border-color: var(--neon-purple); /* 🟣 ФИОЛЕТОВАЯ рамка поля */
+}
+
+.auth-form.register-mode button {
+    background-color: var(--neon-green); /* 🟢 ЗЕЛЕНАЯ кнопка */
+    border-color: var(--neon-green);
+}
+
+/* 📝 ЗАГОЛОВОК ФОРМЫ */
+.auth-form h2 {
+    text-shadow: 0 0 10px currentColor;
     margin-bottom: 25px;
     text-transform: uppercase;
+    font-size: 1.5em;
 }
 
+/* 📝 ГРУППЫ ПОЛЕЙ ВВОДА */
 .form-group {
     margin-bottom: 20px;
     text-align: left;
@@ -29,8 +83,10 @@
     margin-bottom: 8px;
     color: var(--neon-green);
     text-shadow: var(--glitch-shadow);
+    font-weight: bold;
 }
 
+/* 🎨 ПОЛЯ ВВОДА */
 .form-group input {
     width: 100%;
     padding: 12px;
@@ -40,57 +96,147 @@
     border-radius: 6px;
     font-family: 'Courier New', monospace;
     box-sizing: border-box;
+    transition: all 0.3s ease;
 }
 
 .form-group input:focus {
     outline: none;
-    border-color: var(--neon-purple);
-    box-shadow: 0 0 10px var(--neon-purple);
+    box-shadow: 0 0 10px currentColor;
 }
 
+/* 🔘 КНОПКА ОТПРАВКИ */
 .auth-form button {
     width: 100%;
     padding: 12px;
-    background-color: var(--neon-purple);
     color: white;
-    border: 2px solid var(--neon-purple);
+    border: 2px solid;
     border-radius: 6px;
     cursor: pointer;
     font-family: inherit;
     text-transform: uppercase;
     margin-bottom: 15px;
+    transition: all 0.3s ease;
+    font-weight: bold;
 }
 
 .auth-form button:hover {
-    background-color: var(--neon-blue);
-    border-color: var(--neon-blue);
+    filter: brightness(1.2);
+    box-shadow: 0 0 15px currentColor;
 }
 
+.auth-form button:active {
+    transform: scale(0.98);
+}
+
+/* ❌ СООБЩЕНИЯ ОБ ОШИБКАХ */
 .error-message {
     margin-top: 5px;
     font-size: 0.9em;
     min-height: 20px;
+    color: #ff4444;
+    text-shadow: 0 0 5px #ff4444;
 }
 
+/* 🔗 ТЕКСТ И ССЫЛКИ */
 .auth-form p {
     color: var(--neon-green);
+    margin: 0;
 }
 
 .auth-form a {
     color: var(--neon-blue);
     text-decoration: none;
+    transition: all 0.3s ease;
 }
 
 .auth-form a:hover {
     text-shadow: 0 0 10px var(--neon-blue);
+    color: var(--neon-cyan);
 }
 
-#authForm button:disabled {
+/* 🚫 ЗАБЛОКИРОВАННАЯ КНОПКА */
+.auth-form button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-    background-color: var(--neon-purple) !important; /* сохраняем цвет */
+    background-color: #666 !important;
+    border-color: #666 !important;
+    box-shadow: none !important;
 }
 
-#authForm button:disabled:hover {
-    background-color: var(--neon-purple) !important; /* убираем hover эффект */
+.auth-form button:disabled:hover {
+    filter: none !important;
+    box-shadow: none !important;
+}
+
+/* ✨ ДОПОЛНИТЕЛЬНЫЕ ЭФФЕКТЫ */
+.auth-form {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0.8; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* 📱 АДАПТИВНОСТЬ */
+@media (max-width: 480px) {
+    .auth-form {
+        margin: 20px auto;
+        padding: 20px;
+    }
+    
+    .auth-form h2 {
+        font-size: 1.3em;
+    }
+}
+
+/* 🔔 СИСТЕМА УВЕДОМЛЕНИЙ */
+.auth-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 6px;
+    color: white;
+    font-family: 'Courier New', monospace;
+    z-index: 1000;
+    animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s;
+    border: 2px solid;
+    text-shadow: var(--glitch-shadow);
+    max-width: 300px;
+    backdrop-filter: blur(10px);
+}
+
+.toast-success {
+    background: rgba(0, 255, 0, 0.1);
+    border-color: var(--neon-green);
+    box-shadow: 0 0 15px var(--neon-green);
+}
+
+.toast-error {
+    background: rgba(255, 0, 0, 0.1);
+    border-color: #ff0000;
+    box-shadow: 0 0 15px #ff0000;
+}
+
+@keyframes slideInRight {
+    from { 
+        transform: translateX(100%); 
+        opacity: 0; 
+    }
+    to { 
+        transform: translateX(0); 
+        opacity: 1; 
+    }
+}
+
+@keyframes fadeOut {
+    from { 
+        opacity: 1; 
+        transform: translateX(0);
+    }
+    to { 
+        opacity: 0; 
+        transform: translateX(100%);
+    }
 }
