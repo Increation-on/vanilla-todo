@@ -1,12 +1,11 @@
 // event-handlers.js
-import { addBtn, addApiTasksButton } from './dom-elements.js'
+import { addBtn, addApiTasksButton, taskInput } from './dom-elements.js'
 import { loadTaskFromAPI } from './api.js'
 import { handleNewTask, initializeTasks } from './task-controller.js'
 import { initRouter } from './router.js'
-import { AuthForm } from './auth/auth-form.js'
+import { initAuthForm } from './auth/auth-form.js' // ← ИМПОРТИРУЕМ ПЕРЕИМЕНОВАННУЮ ФУНКЦИЮ
 import { AuthManager } from './auth/auth-manager.js'
 import { initSearch } from './search/search.js'
-import { taskInput } from './dom-elements.js'
 
 /**
  * ГЛАВНЫЙ ЗАПУСК ПРИЛОЖЕНИЯ
@@ -70,8 +69,10 @@ const showAuthForm = () => {
     authContainer.id = 'auth-container';
     document.body.appendChild(authContainer);
 
-    // Рендерим форму
-    AuthForm.render(authContainer);
+    // Рендерим форму через функцию ← ОБНОВЛЯЕМ ВЫЗОВ
+    initAuthForm(authContainer, ()=>{
+        initApp();
+    });
 }
 
 /**
@@ -96,7 +97,6 @@ const showTodoApp = () => {
     initializeTasks();
     initGlobalEventHandlers();
     initRouter();
-
     initSearch();
 }
 
@@ -106,7 +106,7 @@ const showTodoApp = () => {
 export const initGlobalEventHandlers = () => {
     addBtn.addEventListener('click', handleNewTask);
     addApiTasksButton.addEventListener('click', loadTaskFromAPI);
-    // В initGlobalEventHandlers, после addBtn click listener:
+    
     taskInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             handleNewTask();
