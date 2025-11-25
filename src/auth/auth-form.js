@@ -3,6 +3,7 @@ import { setupValidation } from './validation/setup-validation.js'
 import { setupModeSwitcher } from './form-mode-switcher.js'
 import { setupFormSubmit } from './form-submit.js'
 import { handleAuthSubmit } from './auth-controller.js'
+import { resetTaskStorage } from '../storage.js'
 import './auth.css'
 
 // 🎯 ГЛАВНЫЙ ИНИЦИАЛИЗАТОР ФОРМЫ АВТОРИЗАЦИИ 
@@ -26,10 +27,13 @@ export function initAuthForm(container, onLoginSuccessCallback = () => { }) {
 function setupAuthForm(onLoginSuccess) {
     setupValidation()          // ✅ система валидации полей
     setupModeSwitcher()        // 🔄 переключение логин/регистрация
-    
+
     // 🎪 Настраиваем обработчик сабмита с передачей колбэка
     setupFormSubmit((formData, isLoginMode) => {
         // 📤 Передаем данные в бизнес-логику (auth-controller)
-        handleAuthSubmit(formData, isLoginMode, onLoginSuccess)
+        handleAuthSubmit(formData, isLoginMode, () => {
+            resetTaskStorage()
+            onLoginSuccess()
+        })
     })
 }
