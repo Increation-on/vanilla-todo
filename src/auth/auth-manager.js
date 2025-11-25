@@ -12,9 +12,10 @@
  * - Всегда работает с актуальными данными из localStorage
  * - Чистые функции (кроме side effects в localStorage)
  */
+import { createMockJWT, parseMockJWT } from '../utils/jwt.js'
+import { generateUserId } from '../utils/id-generator.js'
 
 export const AuthManager = {
-    
     /**
      * 📋 ПОЛУЧЕНИЕ СПИСКА ВСЕХ ЗАРЕГИСТРИРОВАННЫХ ПОЛЬЗОВАТЕЛЕЙ
      * 
@@ -22,75 +23,130 @@ export const AuthManager = {
      * Это предотвращает рассинхронизацию при нескольких вкладках
      */
     getUsers() {
-        return JSON.parse(localStorage.getItem('users')) || [];
+        return JSON.parse(localStorage.getItem('users')) || []
     },
-    
+
+    /**
+     * 📧 ПОЛУЧЕНИЕ ДАННЫХ ТЕКУЩЕГО ПОЛЬЗОВАТЕЛЯ
+     * 
+     * НОВАЯ ФУНКЦИОНАЛЬНОСТЬ:
+     * - Получаем email из JWT токена вместо отдельного поля
+     * - Используется для отображения в хедере
+     */
+    getCurrentUser() {
+        if (!this.isLoggedIn()) return null
+
+        const token = localStorage.getItem('token')
+        const payload = parseMockJWT(token)
+        return {
+            email: payload.email,
+            expires: payload.expires
+        }
+    },
+
     /**
      * 📝 РЕГИСТРАЦИЯ НОВОГО ПОЛЬЗОВАТЕЛЯ
      * ПРОЦЕСС:
      * 1. Проверяем что email еще не занят
      * 2. Создаем нового пользователя
      * 3. Сохраняем в общий список пользователей
+     * 4. АВТОМАТИЧЕСКИ ВХОДИМ В СИСТЕМУ
      */
     register(email, password) {
-        const users = this.getUsers();
-        const existingUser = users.find(user => user.email === email);
+        const users = this.getUsers()
+        const existingUser = users.find(user => user.email === email)
         if (existingUser) {
-            return false; // 🚫 Email уже занят
+            return false
         }
-        
-        const newUser = { email, password };
-        users.push(newUser);
-        localStorage.setItem('users', JSON.stringify(users));
-        
-        console.log('📝 Новый пользователь:', email);
-        return true; // ✅ Успешная регистрация
+
+        const newUser = {id: generateUserId(), email, password }
+        users.push(newUser)
+        localStorage.setItem('users', JSON.stringify(users))
+
+        // 🔄 АВТОМАТИЧЕСКИЙ ВХОД ПОСЛЕ РЕГИСТРАЦИИ
+        return this.login(email, password)
     },
 
     /**
      * 🔐 АУТЕНТИФИКАЦИЯ ПОЛЬЗОВАТЕЛЯ (ВХОД В СИСТЕМУ)
      * 
-     * ПРОЦЕСС:
-     * 1. Ищем пользователя по email и паролю
-     * 2. Если найден - создаем сессию
-     * 3. Сохраняем статус входа в localStorage
+     * ОБНОВЛЕННАЯ ЛОГИКА:
+     * - Вместо простых флагов создаем JWT токен
+     * - Токен содержит email и время expiration
+     * - Срок жизни токена 12 минут (720000 мс)
      */
     login(email, password) {
-        const users = this.getUsers();
-        const user = users.find(user => 
+        const users = this.getUsers()
+        const user = users.find(user =>
             user.email === email && user.password === password
-        );
-        
-        if (user) {
-            // 🎪 СОЗДАЕМ СЕССИЮ ПОЛЬЗОВАТЕЛЯ
-            localStorage.setItem('isLoggedIn', 'true');
-            localStorage.setItem('userEmail', email);
-            return true; // ✅ Успешный вход
+        )
+
+        if (!user) {
+            return false
         }
-        return false; // 🚫 Неверный email или пароль
+
+        // 🎫 СОЗДАЕМ JWT ТОКЕН
+        const token = createMockJWT({
+            userId: user.id,
+            email: user.email,
+            expires: Date.now() + 7200000 // 120 минут
+        })
+
+        localStorage.setItem('token', token)
+
+        return true
     },
 
     /**
      * 🚪 ВЫХОД ИЗ СИСТЕМЫ (ЗАВЕРШЕНИЕ СЕССИИ)
      * 
-     * ПРОЦЕСС:
-     * - Удаляем флаги сессии из localStorage
-     * - Не трогаем данные пользователей (они остаются для будущих входов)
+     * ОБНОВЛЕННАЯ ЛОГИКА:
+     * - Удаляем только JWT токен
+     * - Данные пользователей остаются для будущих входов
      */
     logout() {
-        localStorage.removeItem('isLoggedIn');
-        localStorage.removeItem('userEmail');
+        localStorage.removeItem('token')
     },
 
     /**
      * 🔍 ПРОВЕРКА СТАТУСА АВТОРИЗАЦИИ
      * 
-     * ИСПОЛЬЗУЕТСЯ ДЛЯ:
-     * - Определения показывать ли форму входа или основное приложение
-     * - Отображения информации о текущем пользователе
+     * ОБНОВЛЕННАЯ ЛОГИКА:
+     * - Проверяем наличие токена
+     * - Парсим и проверяем его валидность
+     * - Автоматически разлогиниваем при просрочке
      */
     isLoggedIn() {
-        return localStorage.getItem('isLoggedIn') === 'true';
+        const token = localStorage.getItem('token')
+        if (!token) return false
+
+        const payload = parseMockJWT(token)
+        if (!payload) return false
+
+        // 🕒 ПРОВЕРКА ПРОСРОЧКИ ТОКЕНА
+        if (Date.now() > payload.expires) {
+            this.logout()
+            return false
+        }
+
+        return true
+    },
+
+    /**
+     * ⏰ ЗАПУСК СЛЕЖЕНИЯ ЗА ТОКЕНОМ
+     * 
+     * НОВАЯ ФУНКЦИОНАЛЬНОСТЬ:
+     * - Проверяем токен каждые 60 секунд
+     * - При просрочке автоматически разлогиниваем
+     * - Генерируем событие для обновления UI
+     */
+    startTokenWatch() {
+        setInterval(() => {
+            if (!this.isLoggedIn()) {
+                this.logout()
+                window.dispatchEvent(new CustomEvent('authExpired'))
+            }
+        }, 60000)
     }
 }
 
@@ -101,6 +157,6 @@ export const AuthManager = {
 
 // 🔮 ВОЗМОЖНЫЕ УЛУЧШЕНИЯ:
 // - Хеширование паролей (bcrypt)
-// - JWT токены вместо флагов в localStorage  
+// - JWT токены вместо флагов в localStorage
 // - Время жизни сессии
 // - Восстановление пароля

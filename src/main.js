@@ -12,6 +12,7 @@
  */
 
 import { initApp } from './event-handlers.js'
+import { resetTaskStorage } from './storage.js'
 
 /**
  * ЗАПУСК ПРИЛОЖЕНИЯ ПРИ ГОТОВНОСТИ DOM
@@ -29,6 +30,7 @@ import { initApp } from './event-handlers.js'
  * ВСЯ СЛОЖНОСТЬ скрыта в initApp()
  */
 document.addEventListener('DOMContentLoaded', () => {
+    resetTaskStorage()
     initApp() // 🚀 Одна команда - весь функционал
 })
 

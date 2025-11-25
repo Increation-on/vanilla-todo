@@ -12,7 +12,7 @@
  * ПРИНЦИП: Посредник между пользователем и системой хранения
  */
 
-import { addTaskToStorage, getTasksFromStorage } from './storage.js'
+import { addTaskToStorage, getTasksFromStorage, resetTaskStorage} from './storage.js'
 import { renderTask, createTaskElement } from './dom-manager.js'
 import { taskInput } from './dom-elements.js'
 import { bindTaskEventHandlers as bindTaskEvents } from './task-event-binder.js'
@@ -149,6 +149,7 @@ export const handleNewTask = () => {
  * с источником 'storage' (уже готовые объекты задач)
  */
 export const initializeTasks = () => {
+    resetTaskStorage()
     const savedTasks = getTasksFromStorage()
 
     savedTasks.forEach((task) => {

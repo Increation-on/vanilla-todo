@@ -3,22 +3,35 @@ import { addBtn, addApiTasksButton, taskInput } from './dom-elements.js'
 import { loadTaskFromAPI } from './api.js'
 import { handleNewTask, initializeTasks } from './task-controller.js'
 import { initRouter } from './router.js'
-import { initAuthForm } from './auth/auth-form.js' // ← ИМПОРТИРУЕМ ПЕРЕИМЕНОВАННУЮ ФУНКЦИЮ
+import { initAuthForm } from './auth/auth-form.js'
 import { AuthManager } from './auth/auth-manager.js'
 import { initSearch } from './search/search.js'
+import { resetTaskStorage } from './storage.js' // 🆕 ИМПОРТИРУЕМ ФУНКЦИЮ
+
+/**
+ * ОБРАБОТЧИК ПРОСРОЧКИ ТОКЕНА
+ */
+window.addEventListener('authExpired', () => {
+    console.log('🎯 authExpired event received!')
+    resetTaskStorage() // 🆕 СБРАСЫВАЕМ ЗАДАЧИ ПРИ ПРОСРОЧКЕ
+    initApp()
+})
 
 /**
  * ГЛАВНЫЙ ЗАПУСК ПРИЛОЖЕНИЯ
  */
 export const initApp = () => {
     // Всегда обновляем header
-    updateAuthHeader();
+    updateAuthHeader()
+
+    resetTaskStorage() // 🆕 СБРАСЫВАЕМ ПЕРЕД ПРОВЕРКОЙ АВТОРИЗАЦИИ
 
     // Проверяем авторизацию
     if (!AuthManager.isLoggedIn()) {
-        showAuthForm();
+        showAuthForm()
     } else {
-        showTodoApp();
+        AuthManager.startTokenWatch()
+        showTodoApp()
     }
 }
 
@@ -26,23 +39,25 @@ export const initApp = () => {
  * ОБНОВЛЯЕМ HEADER В ЗАВИСИМОСТИ ОТ АВТОРИЗАЦИИ
  */
 const updateAuthHeader = () => {
-    const authInfo = document.getElementById('auth-info');
-    const userEmail = document.getElementById('user-email');
-    const logoutBtn = document.getElementById('logoutBtn');
+    const authInfo = document.getElementById('auth-info')
+    const userEmail = document.getElementById('user-email')
+    const logoutBtn = document.getElementById('logoutBtn')
 
     if (AuthManager.isLoggedIn()) {
         // Показываем информацию о пользователе
-        authInfo.style.display = 'flex';
-        userEmail.textContent = localStorage.getItem('userEmail');
+        authInfo.style.display = 'flex'
+        const currentUser = AuthManager.getCurrentUser()
+        userEmail.textContent = currentUser.email
 
         // Настраиваем кнопку выхода
         logoutBtn.onclick = () => {
-            AuthManager.logout();
-            initApp(); // перезапускаем приложение
-        };
+            AuthManager.logout()
+            resetTaskStorage() // 🆕 ОЧИЩАЕМ ЗАДАЧИ ПРИ ВЫХОДЕ
+            initApp()
+        }
     } else {
         // Скрываем информацию о пользователе
-        authInfo.style.display = 'none';
+        authInfo.style.display = 'none'
     }
 }
 
@@ -50,66 +65,67 @@ const updateAuthHeader = () => {
  * ПОКАЗЫВАЕМ ФОРМУ АВТОРИЗАЦИИ (скрываем задачи)
  */
 const showAuthForm = () => {
-    console.log('📝 Showing auth form');
+    console.log('📝 Showing auth form')
 
     // Скрываем контейнер с задачами
-    const container = document.querySelector('.container');
+    const container = document.querySelector('.container')
     if (container) {
-        container.style.display = 'none';
+        container.style.display = 'none'
     }
 
     // Убираем старую форму если есть
-    const oldAuthContainer = document.getElementById('auth-container');
+    const oldAuthContainer = document.getElementById('auth-container')
     if (oldAuthContainer) {
-        oldAuthContainer.remove();
+        oldAuthContainer.remove()
     }
 
     // Создаем контейнер для формы
-    const authContainer = document.createElement('div');
-    authContainer.id = 'auth-container';
-    document.body.appendChild(authContainer);
+    const authContainer = document.createElement('div')
+    authContainer.id = 'auth-container'
+    document.body.appendChild(authContainer)
 
-    // Рендерим форму через функцию ← ОБНОВЛЯЕМ ВЫЗОВ
-    initAuthForm(authContainer, ()=>{
-        initApp();
-    });
+    // Рендерим форму через функцию
+    initAuthForm(authContainer, () => {
+        resetTaskStorage() // 🆕 СБРАСЫВАЕМ ПЕРЕД ПОКАЗОМ ЗАДАЧ НОВОГО ПОЛЬЗОВАТЕЛЯ
+        initApp()
+    })
 }
 
 /**
  * ПОКАЗЫВАЕМ ТУДУ-ЛИСТ (скрываем форму)
  */
 const showTodoApp = () => {
-    console.log('📋 Showing todo app');
+    console.log('📋 Showing todo app')
 
     // Показываем контейнер с задачами
-    const container = document.querySelector('.container');
+    const container = document.querySelector('.container')
     if (container) {
-        container.style.display = 'block';
+        container.style.display = 'block'
     }
 
     // Убираем форму авторизации если есть
-    const authContainer = document.getElementById('auth-container');
+    const authContainer = document.getElementById('auth-container')
     if (authContainer) {
-        authContainer.remove();
+        authContainer.remove()
     }
 
     // Инициализируем туду-функциональность
-    initializeTasks();
-    initGlobalEventHandlers();
-    initRouter();
-    initSearch();
+    initializeTasks()
+    initGlobalEventHandlers()
+    initRouter()
+    initSearch()
 }
 
 /**
  * Настраивает глобальные обработчики событий для туду-листа
  */
 export const initGlobalEventHandlers = () => {
-    addBtn.addEventListener('click', handleNewTask);
-    addApiTasksButton.addEventListener('click', loadTaskFromAPI);
-    
+    addBtn.addEventListener('click', handleNewTask)
+    addApiTasksButton.addEventListener('click', loadTaskFromAPI)
+
     taskInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
-            handleNewTask();
+            handleNewTask()
         }
-    });
+    })
 }
