@@ -27,6 +27,9 @@
     padding: 20px;
     min-width: 400px;
     box-shadow: 0 0 20px var(--neon-blue);
+    /* 🛠️ ДОБАВЬ ЭТИ СТРОКИ: */
+    box-sizing: border-box; /* 📏 Учитываем padding в общей ширине */
+    margin: 0 20px; /* 📱 Отступы на мобильных */
 }
 
 .edit-modal__title {
@@ -44,6 +47,8 @@
     border-radius: 4px;
     margin-bottom: 15px;
     font-family: inherit;
+    /* 🛠️ ДОБАВЬ ЭТУ СТРОКУ: */
+    box-sizing: border-box; /* 📏 Учитываем padding в ширине 100% */
 }
 
 .edit-modal__input:focus {
