@@ -1,19 +1,20 @@
-// event-handlers.js
 import { addBtn, addApiTasksButton, taskInput } from './dom-elements.js'
 import { loadTaskFromAPI } from './api.js'
 import { handleNewTask, initializeTasks } from './task-controller.js'
 import { initRouter } from './router.js'
-import { initAuthForm } from './auth/auth-form.js'
 import { AuthManager } from './auth/auth-manager.js'
 import { initSearch } from './search/search.js'
-import { resetTaskStorage } from './storage.js' // 🆕 ИМПОРТИРУЕМ ФУНКЦИЮ
+import { resetTaskStorage } from './storage.js'
+import { AuthViewController } from './view-controllers/auth-view.js'
+import { TodoViewController } from './view-controllers/todo-view.js'
+import { LayoutViewController } from './view-controllers/layout-view.js'
 
 /**
  * ОБРАБОТЧИК ПРОСРОЧКИ ТОКЕНА
  */
 window.addEventListener('authExpired', () => {
     console.log('🎯 authExpired event received!')
-    resetTaskStorage() // 🆕 СБРАСЫВАЕМ ЗАДАЧИ ПРИ ПРОСРОЧКЕ
+    resetTaskStorage()
     initApp()
 })
 
@@ -22,98 +23,34 @@ window.addEventListener('authExpired', () => {
  */
 export const initApp = () => {
     // Всегда обновляем header
-    updateAuthHeader()
+    LayoutViewController.updateAuthHeader(() => {
+        AuthManager.logout()
+        resetTaskStorage()
+        initApp()
+    })
 
-    resetTaskStorage() // 🆕 СБРАСЫВАЕМ ПЕРЕД ПРОВЕРКОЙ АВТОРИЗАЦИИ
+    resetTaskStorage()
 
     // Проверяем авторизацию
     if (!AuthManager.isLoggedIn()) {
-        showAuthForm()
-    } else {
-        AuthManager.startTokenWatch()
-        showTodoApp()
-    }
-}
-
-/**
- * ОБНОВЛЯЕМ HEADER В ЗАВИСИМОСТИ ОТ АВТОРИЗАЦИИ
- */
-const updateAuthHeader = () => {
-    const authInfo = document.getElementById('auth-info')
-    const userEmail = document.getElementById('user-email')
-    const logoutBtn = document.getElementById('logoutBtn')
-
-    if (AuthManager.isLoggedIn()) {
-        // Показываем информацию о пользователе
-        authInfo.style.display = 'flex'
-        const currentUser = AuthManager.getCurrentUser()
-        userEmail.textContent = currentUser.email
-
-        // Настраиваем кнопку выхода
-        logoutBtn.onclick = () => {
-            AuthManager.logout()
-            resetTaskStorage() // 🆕 ОЧИЩАЕМ ЗАДАЧИ ПРИ ВЫХОДЕ
+        // ПОКАЗЫВАЕМ ФОРМУ АВТОРИЗАЦИИ
+        TodoViewController.hideTodoApp()
+        AuthViewController.showAuthForm(() => {
+            resetTaskStorage()
             initApp()
-        }
+        })
     } else {
-        // Скрываем информацию о пользователе
-        authInfo.style.display = 'none'
+        // ПОКАЗЫВАЕМ ТУДУ-ЛИСТ
+        AuthManager.startTokenWatch()
+        AuthViewController.removeAuthForm()
+        TodoViewController.showTodoApp()
+        
+        // Инициализируем функциональность
+        initializeTasks()
+        initGlobalEventHandlers()
+        initRouter()
+        initSearch()
     }
-}
-
-/**
- * ПОКАЗЫВАЕМ ФОРМУ АВТОРИЗАЦИИ (скрываем задачи)
- */
-const showAuthForm = () => {
-    console.log('📝 Showing auth form')
-
-    // Скрываем контейнер с задачами
-    const container = document.querySelector('.container')
-    if (container) {
-        container.style.display = 'none'
-    }
-
-    // Убираем старую форму если есть
-    const oldAuthContainer = document.getElementById('auth-container')
-    if (oldAuthContainer) {
-        oldAuthContainer.remove()
-    }
-
-    // Создаем контейнер для формы
-    const authContainer = document.createElement('div')
-    authContainer.id = 'auth-container'
-    document.body.appendChild(authContainer)
-
-    // Рендерим форму через функцию
-    initAuthForm(authContainer, () => {
-        resetTaskStorage() // 🆕 СБРАСЫВАЕМ ПЕРЕД ПОКАЗОМ ЗАДАЧ НОВОГО ПОЛЬЗОВАТЕЛЯ
-        initApp()
-    })
-}
-
-/**
- * ПОКАЗЫВАЕМ ТУДУ-ЛИСТ (скрываем форму)
- */
-const showTodoApp = () => {
-    console.log('📋 Showing todo app')
-
-    // Показываем контейнер с задачами
-    const container = document.querySelector('.container')
-    if (container) {
-        container.style.display = 'block'
-    }
-
-    // Убираем форму авторизации если есть
-    const authContainer = document.getElementById('auth-container')
-    if (authContainer) {
-        authContainer.remove()
-    }
-
-    // Инициализируем туду-функциональность
-    initializeTasks()
-    initGlobalEventHandlers()
-    initRouter()
-    initSearch()
 }
 
 /**
