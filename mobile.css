@@ -139,6 +139,7 @@
     #taskList li > button {
         position: absolute;
         bottom: 4px;
+        top: 5px;
         min-height: 26px;
         min-width: 65px;
         padding: 6px 12px;
