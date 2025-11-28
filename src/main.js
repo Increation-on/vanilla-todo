@@ -13,6 +13,9 @@
 
 import { initApp } from './event-handlers.js'
 import { resetTaskStorage } from './storage.js'
+import '../style.css'
+import '../mobile.css'
+
 
 /**
  * ЗАПУСК ПРИЛОЖЕНИЯ ПРИ ГОТОВНОСТИ DOM
