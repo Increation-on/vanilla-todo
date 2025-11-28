@@ -7,7 +7,6 @@ export const TodoViewController = {
      * Показывает основной интерфейс с задачами
      */
     showTodoApp() {
-        console.log('📋 Showing todo app')
         const container = document.querySelector(SELECTORS.CONTAINER)
         if (container) {
             container.style.display = 'block'

@@ -26,7 +26,6 @@ import { escapeRegex, escapeHtml } from './utils/escape.js'
  * ВОЗВРАЩАЕТ все созданные элементы для привязки событий
  */
 export const createTaskElement = (task, searchTerm = '') => {
-    console.log('🔧 createTaskElement вызван для задачи:', task.text)
     // Основа - контейнер задачи с ID для связи с данными
     const taskContainer = document.createElement('li')
     taskContainer.dataset.id = task.id
@@ -68,8 +67,6 @@ export const createTaskElement = (task, searchTerm = '') => {
     taskContainer.appendChild(checkbox)
     taskContainer.appendChild(editButton)
     taskContainer.appendChild(deleteButton)
-
-     console.log('🔧 Все элементы добавлены в taskContainer') // ← ДОБАВЬ
 
     // Возвращаем все элементы для дальнейшей работы
     return { 

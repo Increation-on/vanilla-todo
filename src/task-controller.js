@@ -70,7 +70,6 @@ export const addTaskFromSource = (source, data) => {
             const userData = data.text
             const newTask = addTaskToStorage(userData)
             const { taskContainer, taskText, checkbox, deleteButton, editButton, id } = createTaskElement(newTask)
-            console.log('🔧 task-controller: editButton получен', editButton) // ← ДОБАВ
             renderTask(taskContainer)
             bindTaskEvents(taskContainer, taskText, checkbox, deleteButton, editButton, id)
             break
@@ -155,8 +154,6 @@ export const initializeTasks = () => {
     savedTasks.forEach((task) => {
         addTaskFromSource('storage', task)
     })
-
-    console.log('Инициализация завершена')
 }
 
 // 💡 АРХИТЕКТУРНЫЙ КОММЕНТАРИЙ:

@@ -1,0 +1,35 @@
+/* === МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ - MOBILE === */
+@media (max-width: 767px) {
+    .edit-modal__overlay {
+        padding: 20px;
+    }
+    
+    .edit-modal__content {
+        padding: 20px;
+        max-width: 100%;
+        min-width: 0;
+        width: 90%;
+    }
+    
+    .edit-modal__title {
+        font-size: 18px;
+        margin-bottom: 15px;
+    }
+    
+    .edit-modal__input {
+        padding: 12px;
+        margin-bottom: 20px;
+        font-size: 16px;
+    }
+    
+    .edit-modal__actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .edit-modal__btn {
+        padding: 12px 16px;
+        font-size: 16px;
+        min-height: 44px;
+    }
+}
