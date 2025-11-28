@@ -27,8 +27,6 @@ import { initInlineEditor } from './inline-editor/inline-editor.js'
  * - Изменения в интерфейсе → синхронизируются с данными
  */
 export const bindTaskEventHandlers = (taskContainer, taskText, checkbox, deleteButton, editButton, taskId) => {
- console.log('🔧 bindTaskEventHandlers: editButton =', editButton) // ← ДОБАВЬ
-    console.log('🔧 bindTaskEventHandlers: taskId =', taskId) // ← ДОБАВЬ
     /**
      * ОБРАБОТЧИК УДАЛЕНИЯ ЗАДАЧИ
      * 
@@ -60,10 +58,6 @@ export const bindTaskEventHandlers = (taskContainer, taskText, checkbox, deleteB
     initInlineEditor(editButton, taskId, taskText.textContent, (taskId, newText) => {
         // Обновляем текст в DOM
         taskText.textContent = newText
-        
-        // 💡 Если нужно обновить подсветку поиска:
-        // можно вызвать перерисовку задачи или обновить только текст
-        console.log(`Задача ${taskId} обновлена: ${newText}`)
     })
 }
 

@@ -1,5 +1,6 @@
 import { openEditModal } from './modal-creator.js'
 import './inline-editor.css'
+import './inline-editor-mobile.css'
 
 export function initInlineEditor(editButton, taskId, currentText, onTextUpdate) {
     // 🎯 Основная функция инициализации inline-редактора
