@@ -1,45 +1,38 @@
-# To-Do App [Vanilla JS]
+# Vanilla To-do app
 
-Учебное приложение "Список задач", реализованное на чистом JavaScript. Проект создан для изучения основ работы с DOM, управления состоянием и локальным хранилищем.
+A modern, responsive task management application built with vanilla JavaScript and Vite.
 
-**🚀 Живое демо:** (https://vanilla-todo-murex.vercel.app/)
+**🚀 Live demo:** (https://vanilla-todo-murex.vercel.app/)
 
-## 📋 Функциональность
+## 🚀 Features
 
-- Добавление новых задач
-- Отметка задач как выполненных
-- Удаление задач
-- Фильтрация (Все/Активные/Завершенные)
-- Сохранение данных в LocalStorage
+- **Task Management** - Create, edit, delete, and organize tasks
+- **Real-time Search** - Instant search through your tasks
+- **Inline Editing** - Click to edit tasks directly
+- **Authentication** - User authentication system
+- **Responsive Design** - Works on desktop and mobile devices
+- **Toast Notifications** - User feedback system
+- **Client-side Routing** - Smooth navigation between views
 
-## 🛠 Технологии
+## 🛠 Tech Stack
 
-- HTML5
-- CSS3  
-- Vanilla JavaScript (ES6+)
-- LocalStorage API
+- **Frontend**: Vanilla JavaScript, CSS3, HTML5
+- **Build Tool**: Vite
+- **Storage**: Browser LocalStorage
+- **Transpiler**: Babel
+- **Deployment**: Vercel
 
-## 🚀 Запуск проекта
+## 📦 Quick Start
 
 ```bash
-git clone https://github.com/Increation-on/vanilla-todo.git
-bash
-cd vanilla-todo
-# Открой index.html в браузере или используй LiveServer
-```
+# Install dependencies
+npm install
 
-## 📁 Структура проекта
+# Start development server
+npm run dev
 
-vanilla-todo/
-├── index.html
-├── styles.css
-├── script.js
-└── README.md
+# Build for production
+npm run build
 
-## 🎯 Цель проекта
-- Практика работы с DOM API
-- Освоение принципов управления состоянием
-- Работа с браузерным LocalStorage
-- Понимание различий между Vanilla JS и фреймворками
-
-
+# Preview production build
+npm run preview
